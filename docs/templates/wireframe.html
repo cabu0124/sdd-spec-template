@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<!--
+  Wireframe — Spec NNN
+
+  Low-fidelity layout for a spec that puts something on a screen. Lives next to
+  spec.md in specs/<NNN-slug>/, and is mirrored into every repository that
+  implements the spec.
+
+  It answers WHERE THINGS SIT. It does not answer what they look like: no real
+  color, no real typography, no real iconography, no components. Grayscale and
+  hand-drawn are deliberate — a wireframe that looks finished gets reviewed as a
+  design instead of as a layout.
+
+  Rules for filling it in:
+    - One <section> per screen. Every screen the spec puts in scope, and no other.
+    - Each screen drawn once per breakpoint, side by side, so the responsive
+      decision is visible instead of described.
+    - Every element traces back to a requirement id in spec.md. If you are
+      drawing something no requirement asks for, the spec is incomplete — stop
+      and fix the spec, do not invent it here.
+    - The spec wins. On any discrepancy the wireframe is corrected, never the spec.
+
+  Opens in any browser straight from disk. No build step, no runtime file, no
+  network needed: the webfonts are progressive enhancement and every stack falls
+  back to a system face. The <x-dc>/<helmet> wrapper keeps the file compatible
+  with a canvas editor; it renders identically without one.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ------------------------------------------------------------------ *
+ * Canvas chrome — the frame around the wireframes. Rarely edited.
+ * ------------------------------------------------------------------ */
+body{margin:0;background:#f2f1ee;color:#111;
+     font-family:'Patrick Hand','Comic Sans MS','Segoe Print',cursive}
+.dv-turn{padding:40px 44px 60px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 22px}
+.dv-tid{font:600 12px ui-monospace,monospace;padding:3px 8px;background:#111;color:#fff;border-radius:4px}
+.dv-tname{font:20px/1.2 'Caveat','Bradley Hand',cursive;font-weight:700}
+.dv-opts{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px}
+.dv-oid{display:inline-block;font:600 12px ui-monospace,monospace;padding:3px 8px;background:rgba(0,0,0,.1);border-radius:5px}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:20px 'Caveat','Bradley Hand',cursive;color:#333}
+
+/* Banner: states what this file is and what it is not. Keep it — it is the
+   thing that stops a wireframe being read as a design decision. */
+.wf-banner{border:2px solid #111;background:#fffef8;padding:10px 14px;margin:0 0 22px;
+           font-size:12px;line-height:1.5;max-width:900px}
+.wf-banner b{font:16px 'Caveat','Bradley Hand',cursive;font-weight:700}
+.wf-banner code{font:600 11px ui-monospace,monospace;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px}
+
+/* Sticky note: WHY something sits where it sits. Position with .note--free +
+   inline top/left inside a positioned frame, or drop it in flow as-is. */
+.note{border:1.5px dashed #555;background:#fffef8;padding:6px 9px;font-size:12px;
+      line-height:1.35;transform:rotate(-1.5deg);box-shadow:1px 1px 0 rgba(0,0,0,.1)}
+.note--free{position:absolute;max-width:170px}
+
+/* ------------------------------------------------------------------ *
+ * Wireframe primitives. Compose screens out of these.
+ *
+ * NOTATION RULE: state is drawn with BORDER WEIGHT + FILL + a reinforced
+ * label — never with color alone. The file is grayscale, and so is the
+ * accessibility floor it stands for.
+ * ------------------------------------------------------------------ */
+.wf-screen{position:relative;border:2.5px solid #111;background:#fff;flex:none}
+
+/* Top bar — same element order at every breakpoint; it collapses to icons on
+   mobile, it does not reshuffle. */
+.wf-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:2px solid #111;background:#fff}
+.wf-bar--wide{padding:12px 24px;gap:10px}
+.wf-bar__logo{font:20px 'Caveat','Bradley Hand',cursive;font-weight:700}
+.wf-bar__chip{border:1.5px solid #111;border-radius:10px;padding:2px 7px;font-size:11px;white-space:nowrap}
+.wf-bar__spacer{flex:1}
+
+/* Page header — the screen title and its page-level action live HERE, under the
+   top bar, never inside it. */
+.wf-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+         padding:14px 16px;border-bottom:1.5px dashed #999}
+.wf-title{font:22px 'Caveat','Bradley Hand',cursive;font-weight:700}
+
+.wf-body{padding:16px;display:flex;flex-direction:column;gap:14px}
+.wf-split{display:flex;align-items:stretch}
+
+/* Master panel of the master–detail pattern. On mobile, master and detail are
+   two separate screens — draw them as two frames, not as one squeezed. */
+.wf-panel{display:flex;flex-direction:column;gap:10px;padding:16px 14px;
+          border-right:1.5px solid #111;flex:none;width:260px}
+.wf-panel__title{font:18px 'Caveat','Bradley Hand',cursive;font-weight:700}
+.wf-detail{flex:1;padding:16px;display:flex;flex-direction:column;gap:12px}
+
+/* List row: icon/node · label · value · chevron. */
+.wf-row{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;
+        border:1.5px solid #111;border-radius:12px;font-size:12px}
+.wf-row__icon{flex:none;width:20px;text-align:center}
+.wf-row__label{flex:1;min-width:0;font-weight:700}
+.wf-row__value{flex:none;font-size:11px;color:#555}
+.wf-row__chev{flex:none;color:#555}
+.wf-row--emph{border-width:2.5px}                               /* permanent emphasis */
+.wf-row--active{border-width:2.5px;background:#eee}             /* open / selected  */
+.wf-row--active .wf-row__label{font:15px 'Caveat','Bradley Hand',cursive;font-weight:700}
+.wf-row--off{color:#999;border-color:#bbb}                      /* unavailable      */
+.wf-row--off .wf-row__label{font-weight:400}
+
+/* Step node — takes the icon slot in a stepped flow. */
+.wf-node{width:24px;height:24px;border-radius:50%;border:1.5px solid #111;flex:none;
+         display:flex;align-items:center;justify-content:center;font-size:11px}
+.wf-node--done{background:#111;color:#fff}
+.wf-node--off{border-color:#bbb;color:#999}
+
+/* Form */
+.wf-field{display:flex;flex-direction:column;gap:4px}
+.wf-field__label{font-size:12px;color:#555}
+.wf-input{height:44px;border:1.5px solid #111;border-radius:6px;display:flex;align-items:center;
+          justify-content:flex-end;padding:0 12px;font-size:12px;color:#777}
+.wf-input--err{border-width:2.5px;border-style:double}
+.wf-choice{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;
+           border:1.5px solid #111;border-radius:12px;font-size:13px}
+.wf-choice--on{border-width:2.5px;background:#eee}
+
+/* Buttons — minimum 44px touch target, always. */
+.wf-btn{min-height:44px;border:1.5px solid #111;border-radius:8px;display:flex;
+        align-items:center;justify-content:center;padding:0 16px;font-size:14px}
+.wf-btn--primary{min-height:50px;border-width:2.5px;font:20px 'Caveat','Bradley Hand',cursive;font-weight:700}
+.wf-btn--off{border:1.5px dashed #999;color:#999}
+
+.wf-card{border:1.5px solid #111;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.wf-ph{border:2px dashed #111;border-radius:10px;display:flex;align-items:center;
+       justify-content:center;font-size:11px;color:#555}
+.wf-alert{border:2px solid #111;border-radius:6px;padding:6px 8px;font-size:11px;line-height:1.35}
+.wf-divider{display:flex;align-items:center;gap:8px;color:#777;font-size:12px}
+.wf-divider::before,.wf-divider::after{content:"";flex:1;border-top:1px dashed #999}
+
+/* State variants — empty, error, loading, permission-denied. A screen is not
+   specified until its unhappy states are drawn. */
+.wf-states{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.wf-state{width:200px;border:2px solid #111;background:#fff;padding:12px;
+          display:flex;flex-direction:column;gap:8px}
+.wf-state__name{font:15px 'Caveat','Bradley Hand',cursive;font-weight:700}
+</style>
+</helmet>
+
+<!-- ==================================================================== *
+     ONE SECTION PER SCREEN. Duplicate this whole <section> for the next
+     screen and bump the id (t2, t3, …).
+     ==================================================================== -->
+<section class="dv-turn" id="t1">
+
+<div class="dv-thd">
+  <span class="dv-tid">1</span>
+  <span class="dv-tname">&lt;Screen name&gt; — 3 breakpoints (low fidelity, grayscale)</span>
+</div>
+
+<!-- Fill the two placeholders. Do not delete this banner. -->
+<div class="wf-banner">
+  <b>Low-fidelity wireframe — a LAYOUT reference, not an appearance reference.</b><br>
+  Source of truth: <code>specs/&lt;NNN-slug&gt;/spec.md</code>. What is taken from it:
+  <b>arrangement, hierarchy, on-screen content and behaviour per breakpoint</b>. What is
+  <b>not</b>: color, grays, type sizes, typeface, iconography — the symbols here
+  (→ ▾ ● ⟳ ☰) are low-fidelity notation, not the icon set.<br>
+  Every element on this page traces to a requirement in that spec. <b>On any discrepancy
+  the spec wins</b>: the wireframe is corrected, never the other way round.
+</div>
+
+<div class="dv-opts">
+
+  <!-- ============ 1a — MOBILE 375 ============
+       Narrowest first: it forces the priority decision. What survives here is
+       what actually matters; everything else is progressive disclosure. -->
+  <div class="dv-opt" id="1a">
+    <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a> Mobile — 375px</div>
+
+    <div class="wf-screen" style="width:375px">
+      <div class="wf-bar">
+        <span class="wf-bar__logo">&lt;App&gt;</span>
+        <span class="wf-bar__chip">●</span>
+        <span class="wf-bar__spacer"></span>
+        <span class="wf-bar__chip">☰</span>
+      </div>
+
+      <div class="wf-head">
+        <span class="wf-title">&lt;Screen title&gt;</span>
+        <span class="wf-bar__chip">＋</span>
+      </div>
+
+      <div class="wf-body">
+        <div class="wf-input" style="justify-content:flex-start;color:#777">&lt;search / filter&gt;</div>
+
+        <!-- Master list. On mobile the detail is a SEPARATE screen: tapping a
+             row navigates, it does not open a side panel. -->
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="wf-row wf-row--emph">
+            <span class="wf-row__icon">▣</span>
+            <span class="wf-row__label">&lt;Item — highest priority&gt;</span>
+            <span class="wf-row__value">&lt;value&gt;</span>
+            <span class="wf-row__chev">›</span>
+          </div>
+          <div class="wf-row">
+            <span class="wf-row__icon">▣</span>
+            <span class="wf-row__label">&lt;Item&gt;</span>
+            <span class="wf-row__value">&lt;value&gt;</span>
+            <span class="wf-row__chev">›</span>
+          </div>
+          <div class="wf-row wf-row--off">
+            <span class="wf-row__icon">▣</span>
+            <span class="wf-row__label">&lt;Item — unavailable&gt;</span>
+            <span class="wf-row__value">—</span>
+          </div>
+        </div>
+
+        <div class="wf-btn wf-btn--primary">&lt;Primary action&gt;</div>
+      </div>
+    </div>
+
+    <div style="width:375px;display:flex;flex-direction:column;gap:6px">
+      <div class="note">&lt;Why this order, and what got dropped at this width — cite the requirement id.&gt;</div>
+      <div class="note">Touch targets stay at 44px minimum.</div>
+    </div>
+
+    <!-- Unhappy states. Draw the ones the spec names; delete the rest. -->
+    <div class="wf-states">
+      <div class="wf-state">
+        <div class="wf-state__name">STATE: empty</div>
+        <div class="wf-ph" style="height:40px">&lt;illustration&gt;</div>
+        <div style="font-size:11px;line-height:1.3">&lt;What the user sees before any data exists, and the one action out of it.&gt;</div>
+        <div class="wf-btn" style="min-height:30px;font-size:11px">&lt;Create first item&gt;</div>
+      </div>
+      <div class="wf-state">
+        <div class="wf-state__name">STATE: error</div>
+        <div class="wf-alert">⚠ &lt;What failed, in the user's words, and what to do next.&gt;</div>
+        <div class="wf-input wf-input--err" style="height:30px"></div>
+      </div>
+      <div class="wf-state">
+        <div class="wf-state__name">STATE: loading / blocked</div>
+        <div class="wf-ph" style="height:30px">⟳ &lt;loading&gt;</div>
+        <div class="wf-btn wf-btn--off" style="min-height:30px;font-size:11px">&lt;Action, disabled&gt;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1b — TABLET 768 ============ -->
+  <div class="dv-opt" id="1b">
+    <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a> Tablet — 768px</div>
+
+    <div class="wf-screen" style="width:768px;height:560px;overflow:hidden">
+      <div class="wf-bar wf-bar--wide">
+        <span class="wf-bar__logo">&lt;App&gt;</span>
+        <span class="wf-bar__chip">● &lt;status&gt;</span>
+        <span class="wf-bar__spacer"></span>
+        <span class="wf-bar__chip">&lt;user&gt;</span>
+      </div>
+
+      <div class="wf-head">
+        <span class="wf-title">&lt;Screen title&gt;</span>
+        <div class="wf-btn" style="min-height:36px;font-size:13px">&lt;Primary action&gt;</div>
+      </div>
+
+      <!-- Master and detail now share the screen. -->
+      <div class="wf-split" style="height:440px">
+        <div class="wf-panel">
+          <div class="wf-panel__title">&lt;List&gt;</div>
+          <div class="wf-row wf-row--active">
+            <span class="wf-row__icon">▣</span>
+            <span class="wf-row__label">&lt;Selected&gt;</span>
+          </div>
+          <div class="wf-row"><span class="wf-row__icon">▣</span><span class="wf-row__label">&lt;Item&gt;</span></div>
+          <div class="wf-row wf-row--off"><span class="wf-row__icon">▣</span><span class="wf-row__label">&lt;Unavailable&gt;</span></div>
+        </div>
+
+        <div class="wf-detail">
+          <div class="wf-field">
+            <span class="wf-field__label">&lt;Field label&gt;</span>
+            <div class="wf-input"></div>
+          </div>
+          <div class="wf-field">
+            <span class="wf-field__label">&lt;Field label&gt;</span>
+            <div class="wf-input"></div>
+          </div>
+          <div class="wf-divider">&lt;section break&gt;</div>
+          <div class="wf-choice wf-choice--on">◉ &lt;Selected option&gt;</div>
+          <div class="wf-choice">○ &lt;Option&gt;</div>
+        </div>
+      </div>
+
+      <div class="note note--free" style="top:430px;left:16px">&lt;What changes at this width and why — cite the requirement id.&gt;</div>
+    </div>
+  </div>
+
+  <!-- ============ 1c — DESKTOP 1280 ============ -->
+  <div class="dv-opt" id="1c">
+    <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a> Desktop — 1280px</div>
+
+    <div class="wf-screen" style="width:1280px;height:620px;overflow:hidden">
+      <div class="wf-bar wf-bar--wide">
+        <span class="wf-bar__logo">&lt;App&gt;</span>
+        <span class="wf-bar__chip">● &lt;status&gt;</span>
+        <span class="wf-bar__chip">⟳ &lt;sync&gt;</span>
+        <span class="wf-bar__spacer"></span>
+        <span class="wf-bar__chip">&lt;user&gt;</span>
+        <span class="wf-bar__chip">⎋</span>
+      </div>
+
+      <div class="wf-head" style="padding:16px 28px">
+        <span class="wf-title">&lt;Screen title&gt;</span>
+        <div style="display:flex;gap:10px">
+          <div class="wf-btn" style="min-height:38px;font-size:13px">&lt;Secondary&gt;</div>
+          <div class="wf-btn wf-btn--primary" style="min-height:38px;font-size:16px">&lt;Primary action&gt;</div>
+        </div>
+      </div>
+
+      <!-- Body capped at 1200px and centred; the extra width becomes margin,
+           not longer line lengths. -->
+      <div class="wf-split" style="height:490px;max-width:1200px;margin:0 auto">
+        <div class="wf-panel" style="width:300px">
+          <div class="wf-panel__title">&lt;List&gt;</div>
+          <div class="wf-row wf-row--active">
+            <span class="wf-node wf-node--done">✓</span>
+            <span class="wf-row__label">&lt;Step / item, selected&gt;</span>
+            <span class="wf-row__value">&lt;value&gt;</span>
+          </div>
+          <div class="wf-row">
+            <span class="wf-node">2</span>
+            <span class="wf-row__label">&lt;Step / item&gt;</span>
+            <span class="wf-row__chev">›</span>
+          </div>
+          <div class="wf-row wf-row--off">
+            <span class="wf-node wf-node--off">3</span>
+            <span class="wf-row__label">&lt;Not reachable yet&gt;</span>
+          </div>
+        </div>
+
+        <div class="wf-detail" style="padding:24px">
+          <div class="wf-card">
+            <span class="wf-field__label">&lt;Card / section title&gt;</span>
+            <div style="display:flex;gap:14px">
+              <div class="wf-field" style="flex:1">
+                <span class="wf-field__label">&lt;Field&gt;</span>
+                <div class="wf-input"></div>
+              </div>
+              <div class="wf-field" style="flex:1">
+                <span class="wf-field__label">&lt;Field&gt;</span>
+                <div class="wf-input"></div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-ph" style="height:150px">&lt;table / chart / detail region&gt;</div>
+        </div>
+      </div>
+
+      <div class="note note--free" style="top:400px;left:60px">&lt;What the extra width buys — cite the requirement id.&gt;</div>
+    </div>
+  </div>
+
+</div>
+</section>
+
+</x-dc>
+</body>
+</html>

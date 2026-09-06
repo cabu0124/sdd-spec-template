@@ -1,0 +1,11 @@
+# Agent adapters + command files — generated per developer by
+# docs/commands/onboard.md. They only point at AGENTS.md and carry no project
+# content, so they are not shared. To share one: delete its line, commit it.
+/CLAUDE.md
+/GEMINI.md
+/.claude/
+/.cursor/
+/.gemini/
+/.github/copilot-instructions.md
+/.github/prompts/
+/**/*.DS_Store

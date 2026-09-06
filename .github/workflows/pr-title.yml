@@ -1,0 +1,32 @@
+# Conventional Commits, enforced on the pull request title. With squash merge
+# the title becomes the commit, so this is what the release job later reads.
+# See docs/delivery.md.
+name: PR title
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  conventional-commit:
+    runs-on: ubuntu-latest
+    steps:
+      # The title goes through env, never interpolated into the run body: a
+      # title is attacker-controlled text and ${{ ... }} inline is an injection.
+      - name: Validate the title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          types='feat|fix|perf|docs|test|refactor|chore|ci|build|style|revert'
+          if [[ ! "$TITLE" =~ ^($types)(\([a-z0-9._/-]+\))?!?:\ .+$ ]]; then
+            echo "::error::Pull request titles follow Conventional Commits: <type>(<scope>)!: <subject>"
+            echo "::error::Allowed types: $types"
+            echo "Got: $TITLE"
+            exit 1
+          fi
+          echo "OK: $TITLE"

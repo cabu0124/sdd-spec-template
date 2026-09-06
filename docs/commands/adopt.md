@@ -1,0 +1,76 @@
+# /sdd-adopt — bring a spec over from a previous system
+
+**Goal.** Convert one artifact from an earlier spec system — Spec Kit, Kiro,
+homegrown RFCs, ADRs, a feature doc, a spec that lived in a development
+repository — into `specs/<NNN-slug>/`, without inventing anything the original
+did not say.
+
+Argument: the path to one artifact. If it is missing, scan, report what you
+found, and stop for the user to choose.
+
+Run after `/sdd-init`, which is what puts `AGENTS.md` and
+`docs/constitution.md` in place. One artifact per run.
+
+## Read first
+
+- The artifact in full, and anything it links to.
+- `AGENTS.md` and `docs/constitution.md` — the standard it is being adopted into.
+- `docs/templates/spec.md` — the shape it has to end up in.
+- `specs/INDEX.md` — the next free number, and whether it was adopted already.
+- The repository that implements it, if you can reach it: how much is built is a
+  fact about the code, and their checkboxes will not tell you reliably. If you
+  cannot reach it, ask — do not guess.
+
+## Ask only
+
+- Which bucket an artifact belongs in, when the code does not settle it.
+- What a section means, when it has no equivalent here and dropping it would lose
+  a real decision.
+
+Never ask the user to re-derive what is written in the artifact. Read it.
+
+## Steps
+
+1. **Triage first, and report before converting anything.** Three buckets:
+   - *Shipped* — the work is in production. Archive it; do not convert. A spec
+     written after the fact needs acceptance criteria nobody ever agreed to, and
+     writing them now invents the agreement.
+   - *In flight* — partially built. Convert. This is the case that earns the
+     command.
+   - *Not started* — usually better as `/sdd-specify` with the old document as
+     input, which produces a spec rather than a translation. Say so.
+2. **Map, do not translate.** Report the mapping before writing anything: their
+   goal or story → `## Problem`; their requirements → `R1..Rn` in *their* wording
+   with *our* numbering; their criteria → `AC1..ACn`, each naming its
+   requirement. Their design section and their task list do **not** come here:
+   they are HOW, they belong to the repository that builds it, and they are
+   carried over there by that repository's own `/sdd-adopt`. Say so, and say
+   which repository. Anything else with no home is listed, never dropped in
+   silence.
+3. **Do not synthesize.** A requirement that is not testable is carried over as
+   it stands and raised in `## Open questions`. Rewriting it to sound verifiable
+   is deciding what the team meant. If the original has no acceptance criteria,
+   it gets none here — `/sdd-clarify` is the next step, with a human.
+4. **Take implementation state from the code, not their checkboxes.** State it
+   as a finding for the consuming repository, not as a checkbox here — this
+   repository tracks the spec's status, not the work. Where the original and the
+   code disagree, report both and ask.
+5. **Keep the old id reachable.** Their commits, branches and issues point at it.
+   Record the original id and path in the spec header, beside the `US:` line, and
+   name the repositories that already implement it under `Consumers:`.
+6. **Approval does not transfer.** The spec comes out `status: draft` even if it
+   was approved in the other system, and even if it is already built. The
+   artifact changed shape, so the sign-off would be on something nobody has read.
+7. Add the row to `specs/INDEX.md`.
+
+## Writes
+
+`specs/<NNN-slug>/spec.md`, its `wireframe.html` when the original had one, and
+the row in `specs/INDEX.md`. Never a `plan.md` or a `tasks.md` — not here. Never
+the original either: leave it in place until the user trusts the conversion.
+
+## Stops when
+
+One artifact is converted and the mapping is reported: what came across, what had
+no home, and what is now an open question. Next: `/sdd-clarify` on the result,
+almost always.

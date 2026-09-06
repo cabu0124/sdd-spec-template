@@ -1,0 +1,70 @@
+# /sdd-status — move a spec through its lifecycle
+
+**Goal.** Change one spec's `status:`, having checked that the change is honest,
+and tell whoever depends on it. Statuses and their meanings are in
+`docs/lifecycle.md`; this command is the gate in front of them.
+
+Argument: a spec id, and optionally the target status —
+`/sdd-status 014 approved`. With no status, report where the spec stands and what
+the next transition would require. With no argument at all, report every spec and
+stop.
+
+## Read first
+
+- `docs/lifecycle.md` — the transitions, and what each one obliges.
+- The spec in full: header, requirements, acceptance criteria, open questions,
+  amendments.
+- `specs/INDEX.md` — it has to end up agreeing with the header.
+- The spec's `## Consumers`, when the transition is one they can see.
+
+## Ask only
+
+- The target status, when it was not given and more than one is plausible.
+- Confirmation, for any transition the user alone may make: **`approved` is
+  theirs**, and so are `done` and `superseded`. Never set them on your own
+  reading of the situation — report that the gate is met and let them say so.
+- Which spec supersedes this one, when moving to `superseded` and it was not
+  named.
+
+## The gates
+
+Check before writing, and report each check with its result:
+
+| To | Refuse unless |
+| --- | --- |
+| `review` | Every requirement is testable, every acceptance criterion names a requirement, no technology or repository has leaked into a requirement |
+| `approved` | It is in `review`, `## Open questions` is empty, and the user says so |
+| `done` | Every repository in `## Consumers` reports the criteria it took as met. You cannot verify that from here — ask, and name who has not answered |
+| `superseded` | The successor spec exists, is at least `review`, and names this one under `Supersedes:` |
+| back to `draft` | Nothing — but if it was `approved`, it is a published retraction: say who has to stop |
+
+A gate that fails is reported and the status is not moved. Do not offer to fix
+the spec in the same run — that is `/sdd-clarify`.
+
+## Steps
+
+1. Read. Report the current status, the target, and every gate with its result.
+2. Stop if a gate fails, or if the transition is the user's to make and they have
+   not made it.
+3. Write the new `status:` and the `Updated:` date. On `superseded`, fill
+   `Superseded by:` here and `Supersedes:` in the successor.
+4. Leaving `approved` in any direction — including a change made under it —
+   append an amendment line: the date, what changed, and which consumers it
+   affects.
+5. Update the row in `specs/INDEX.md`.
+6. Report who has to act: the repositories in `## Consumers` that must sync
+   (`approved`), re-sync and re-plan (an amended spec), or stop
+   (`superseded`, or a retraction to `draft`). Name them. This repository cannot
+   make the change for them, and saying nothing is how a spec quietly diverges
+   from what is being built.
+
+## Writes
+
+The spec header, its `## Amendments`, and `specs/INDEX.md`. Never a requirement,
+never an acceptance criterion — that is `/sdd-clarify`. Nothing outside this
+repository.
+
+## Stops when
+
+The status is moved and the consumers who must act are named — or a gate failed
+and is reported, with the status unchanged.
