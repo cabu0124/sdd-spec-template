@@ -1,0 +1,15 @@
+# Who has to review what.
+#
+# `docs/lifecycle.md` says only the user approves a spec, and `docs/constitution.md`
+# says amending a principle needs explicit human approval. These lines are those two
+# rules, expressed where GitHub can act on them: a pull request touching any of these
+# paths requests a review from the owner automatically.
+#
+# Enabling "Require review from Code Owners" in the rulesets turns the request into a
+# requirement. Do that once a second person has write access — GitHub does not let an
+# author approve their own pull request, so a sole maintainer would block their own
+# merges. Until then this file documents the authority and assigns the reviewer.
+
+/specs/               @cabu0124
+/docs/constitution.md @cabu0124
+/docs/lifecycle.md    @cabu0124
