@@ -28,7 +28,8 @@ one line that was always in it: WHAT is the product's, HOW is each repository's.
 
 [Why a separate repository](#why-a-separate-repository) · [The loop](#the-loop) ·
 [Bootstrap](#bootstrap) · [What a consumer does](#what-a-consumer-does) ·
-[Layout](#layout) · [Lifecycle](#lifecycle) · [Any agent](#any-agent)
+[Layout](#layout) · [Lifecycle](#lifecycle) · [Any agent](#any-agent) ·
+[License](#license)
 
 ---
 
@@ -140,8 +141,10 @@ changes — is in `docs/example.md` of `sdd-project-template`.
 ```text
 AGENTS.md              source of truth — the only file loaded every session
 README.md              this file — /sdd-init replaces it with your product's own
+LICENSE                MIT — replace it in the repository you create
 .gitignore             keeps the per-developer agent files out of version control
 .github/
+  CODEOWNERS           who reviews a spec, a principle or the lifecycle
   workflows/           pr-title.yml · release.yml — tags consumers can pin to
 docs/
   commands/            the six workflows, one file per command (incl. onboard)
@@ -196,3 +199,11 @@ and the per-tool command files are generated per developer by
 > [!TIP]
 > A team that *does* want to share one deletes its line from `.gitignore` and
 > commits it.
+
+## License
+
+MIT — see [`LICENSE`](LICENSE). Copy it, change it, ship it.
+
+A repository created from this template inherits the file. Replace it with your
+own: the licence of your product's specifications is your decision, not this
+template's.
