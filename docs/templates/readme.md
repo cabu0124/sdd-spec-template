@@ -3,6 +3,12 @@
 <!-- Fill every <...>. Delete the sections you cannot ground in something real.
      Delete this comment when you are done. -->
 
+<!-- Badges. Fill <org>/<repo> and delete the ones you do not want — a badge
+     pointing at the wrong repository is worse than no badge at all.
+[![Latest release](https://img.shields.io/github/v/release/<org>/<repo>?label=specs)](https://github.com/<org>/<repo>/releases)
+[![License](https://img.shields.io/badge/license-<licence>-blue.svg)](LICENSE)
+-->
+
 > <One line: what the product is and who it is for. The same answer as
 > `AGENTS.md` → Product, written for a person who just landed here.>
 
@@ -32,6 +38,18 @@ Start at [`specs/INDEX.md`](specs/INDEX.md).
 | `approved` | Signed off. This is what gets built |
 | `done` | Every repository has met the criteria it took |
 | `superseded` | Replaced — the header names the successor |
+
+```mermaid
+stateDiagram-v2
+  direction LR
+  [*] --> draft
+  draft --> review
+  review --> approved
+  approved --> done
+  approved --> superseded
+  done --> [*]
+  superseded --> [*]
+```
 
 Full rules in [`docs/lifecycle.md`](docs/lifecycle.md).
 
@@ -70,9 +88,11 @@ the fix reaches every repository at once.
 
 ## Writing a spec
 
-```text
-/sdd-specify → /sdd-clarify → /sdd-status <NNN> approved
-    WHAT          the gaps         the gate
+```mermaid
+flowchart LR
+  specify["<b>/sdd-specify</b><br>WHAT"] --> clarify["<b>/sdd-clarify</b><br>the gaps"]
+  clarify --> status["<b>/sdd-status NNN approved</b><br>the gate"]
+  status --> consumers["consumers <b>/sdd-sync</b> it"]
 ```
 
 Specs are technology-agnostic by rule: no endpoint, no framework, no schema, no
