@@ -146,6 +146,7 @@ LICENSE                MIT — replace it in the repository you create
 .github/
   CODEOWNERS           who reviews a spec, a principle or the lifecycle
   workflows/           pr-title.yml · release.yml — tags consumers can pin to
+                       specs-index.yml — statuses valid, index in step, specs only
 docs/
   commands/            the six workflows, one file per command (incl. onboard)
   constitution.md      durable principles; read when a spec is silent
