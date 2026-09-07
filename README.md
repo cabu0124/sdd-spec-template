@@ -29,8 +29,8 @@ flowchart LR
   spec -- "/sdd-sync" --> infra
 ```
 
-Its counterpart is **`sdd-project-template`**, which creates those development
-repositories. Both are the same Spec Driven Development method, split along the
+Its counterpart is **[`sdd-project-template`](https://github.com/cabu0124/sdd-project-template)**,
+which creates those development repositories. Both are the same Spec Driven Development method, split along the
 one line that was always in it: WHAT is the product's, HOW is each repository's.
 
 **Contents**
@@ -96,7 +96,8 @@ flowchart TD
 | 6 | `/sdd-status <NNN> <status>` | Moves the spec through its lifecycle, and says who must re-sync | the gate |
 
 There is no `/sdd-plan`, no `/sdd-tasks`, no `/sdd-implement` here — and that
-absence is the design. They exist, unchanged, in `sdd-project-template`.
+absence is the design. They exist, unchanged, in
+[`sdd-project-template`](https://github.com/cabu0124/sdd-project-template).
 
 **A command is an interactive workflow, not a canned prompt.** Each one reads the
 repository and the existing artifacts first, asks only what it cannot work out
@@ -160,7 +161,9 @@ The slug is the join key; `spec.link.yml` records the mapping.
 
 A complete run of both templates together — writing the spec here, consuming it
 there, planning, tasks, implementation, and what happens when the spec later
-changes — is in `docs/example.md` of `sdd-project-template`.
+changes — is in
+[`docs/example.md`](https://github.com/cabu0124/sdd-project-template/blob/main/docs/example.md)
+of `sdd-project-template`.
 
 ## Layout
 
