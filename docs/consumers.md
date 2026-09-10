@@ -68,7 +68,7 @@ there. The slug is the join key; the numbers are local.
 | Rollout and feature flags | the development repo's plan | a spec is approved, not deployed |
 
 A contract between two development repositories is settled between them, not
-here. Their templates carry `docs/cross-repo.md` for exactly that.
+here. Their templates carry `docs/templates/cross-repo.md` for exactly that.
 
 ## Naming the consumers
 

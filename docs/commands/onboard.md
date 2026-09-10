@@ -23,8 +23,9 @@ the rest work as slash commands.
 
 ## Read first
 
-- `AGENTS.md` — the `Rule 1 — Spec First` block between `<!-- ssd:rule1:start -->`
-  and `<!-- ssd:rule1:end -->` is copied verbatim into every adapter.
+- `AGENTS.md` — the `Rule 1 — Specs Only, Spec First` block between
+  `<!-- sdd:rule1:start -->` and `<!-- sdd:rule1:end -->` is copied verbatim
+  into every adapter.
 - `.gitignore` — it already lists the generated paths; you only add to it if a
   tool needs a path not there yet.
 - Whatever agent files already exist, so a re-run updates instead of duplicating.
@@ -150,7 +151,7 @@ for f in AGENTS.md CLAUDE.md GEMINI.md \
          .github/copilot-instructions.md .cursor/rules/00-spec-first.mdc; do
   [ -f "$f" ] || continue
   printf '%s  %s\n' \
-    "$(sed -n '/ssd:rule1:start/,/ssd:rule1:end/p' "$f" | shasum | cut -c1-8)" "$f"
+    "$(sed -n '/sdd:rule1:start/,/sdd:rule1:end/p' "$f" | shasum | cut -c1-8)" "$f"
 done
 ```
 

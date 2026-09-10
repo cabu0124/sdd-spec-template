@@ -56,7 +56,7 @@ and name that file when you report it.
 2. Ask, in one round where possible.
 3. Fill `AGENTS.md`: Product, Conventions, Boundaries, Done means. Delete every
    `<...>` you cannot fill; an unfilled placeholder is paid for on every turn.
-   Never touch the Rule 1 block, its `<!-- ssd:rule1:* -->` delimiters, or the
+   Never touch the Rule 1 block, its `<!-- sdd:rule1:* -->` delimiters, or the
    "Read on demand" table. Keep the file at 60 lines or fewer. The `Interface`
    line is the one placeholder to fill rather than delete when it does not apply:
    `/sdd-specify` reads it, and `none` is an answer.
@@ -77,12 +77,14 @@ and name that file when you report it.
    with a fact about this product. Not on GitHub Actions: delete
    `.github/workflows/` and name the CI that runs the same checks — a workflow
    for a CI nobody uses is worse than no workflow. Never invent a process nobody
-   follows; "not decided yet" is an answer.
-8. Delete the example spec that ships with the template, and any spec directory
-   that is not this product's. Delete `docs/templates/readme.md` too — it is
-   spent, the README is written. With no user interface, delete
-   `docs/templates/wireframe.html` as well. Create `specs/INDEX.md` from
-   `docs/templates/index.md`, empty of rows. Delete `CHANGELOG.md` if it carries
+   follows; "not decided yet" is an answer. Point `.github/CODEOWNERS` at a
+   reviewer who actually has access, or delete it — a file naming someone
+   without access asks for a review GitHub will silently never request.
+8. Delete any spec directory that is not this product's — `specs/INDEX.md`
+   already ships empty of rows. Delete `docs/templates/readme.md` too — it is
+   spent, the README is written — and `docs/templates/index.md` once
+   `specs/INDEX.md` starts holding real rows. With no user interface, delete
+   `docs/templates/wireframe.html` as well. Delete `CHANGELOG.md` if it carries
    the template's own releases: a repository created from a template inherits it,
    and a changelog opening with someone else's versions is lying from its first
    line.
@@ -95,10 +97,10 @@ and name that file when you report it.
 ## Writes
 
 `AGENTS.md`, `docs/constitution.md`, `README.md`, `docs/consumers.md`,
-`docs/lifecycle.md` and `specs/INDEX.md`. It deletes the inherited `CHANGELOG.md`
-and the spent templates, and `.github/workflows/` when the repository is not on
-GitHub Actions. No specs, no plans, no tasks, no code, and no conversion of
-anyone else's specs.
+`docs/lifecycle.md` and `.github/CODEOWNERS`. It deletes the inherited
+`CHANGELOG.md` and the spent templates, and `.github/workflows/` when the
+repository is not on GitHub Actions. No specs, no plans, no tasks, no code, and
+no conversion of anyone else's specs.
 
 ## Stops when
 

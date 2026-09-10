@@ -5,7 +5,7 @@
 **Source of truth for every agent.** Tool adapters (`CLAUDE.md`, `GEMINI.md`, …) are generated
 per developer by `docs/commands/onboard.md`, only point here, and hold no project content.
 
-<!-- ssd:rule1:start -->
+<!-- sdd:rule1:start -->
 ## Rule 1 — Specs Only, Spec First
 
 This repository holds specifications and product documentation. **No plans, no task
@@ -22,7 +22,7 @@ Classify the request before writing:
 1. Find the spec in `specs/` — one directory per spec, `NNN-slug`, never renumbered. New: write it from `docs/templates/spec.md` with `/sdd-specify` and STOP for approval.
 2. Keep it technology-agnostic. An endpoint, a framework, a table, a repository name or a rollout decision in a requirement is HOW, and HOW is not ours.
 3. An approved spec is a published contract: consumers have mirrored it. Change it through `/sdd-clarify` or a new version, move its status with `/sdd-status`, and say who has to re-sync.
-<!-- ssd:rule1:end -->
+<!-- sdd:rule1:end -->
 
 ## Product
 
@@ -45,7 +45,8 @@ Classify the request before writing:
 
 - [ ] Every requirement is testable, and free of technology
 - [ ] Every acceptance criterion names the requirement it verifies
-- [ ] `## Open questions` is empty before `status: approved`, and `specs/INDEX.md` reflects the change
+- [ ] `## Open questions` is empty before `status: approved`, and
+      `specs/INDEX.md` is regenerated with `scripts/spec-index.sh`
 
 ## Read on demand (not upfront)
 

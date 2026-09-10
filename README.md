@@ -4,7 +4,7 @@
 [![Latest release](https://img.shields.io/github/v/release/cabu0124/sdd-spec-template?label=release)](https://github.com/cabu0124/sdd-spec-template/releases)
 [![Use this template](https://img.shields.io/badge/use%20this-template-2ea44f)](https://github.com/cabu0124/sdd-spec-template/generate)
 
-> **Rule #1 — Specs only, spec first:** this repository holds WHAT and WHY.
+> **Rule 1 — Specs Only, Spec First:** this repository holds WHAT and WHY.
 > Plans, tasks and code belong to the repositories that build them.
 
 A starting point for the **central source of truth for a product's business
@@ -18,7 +18,7 @@ however many development repositories it takes to build.
 
 ```mermaid
 flowchart LR
-  spec["specs/014-password-reset/<br><b>spec.md</b> · wireframe.html<br><i>WHAT · WHY</i>"]
+  spec["specs/NNN-slug/<br><b>spec.md</b> · wireframe.html<br><i>WHAT · WHY</i>"]
 
   web["<b>web-app</b><br>plan.md · tasks.md · code"]
   api["<b>api-svc</b><br>plan.md · tasks.md · code"]
@@ -88,7 +88,7 @@ flowchart TD
 
 | # | Command | What it does | Notes |
 | --- | --- | --- | --- |
-| 1 | `onboard` | Your agent tool's adapter and command files — follow [`docs/commands/onboard.md`](docs/commands/onboard.md), there is no command yet | once per developer |
+| 1 | `onboard` | Your agent tool's adapter and command files — follow [`docs/commands/onboard.md`](docs/commands/onboard.md) | once per developer |
 | 2 | `/sdd-init new\|existing` | Fills `AGENTS.md`, `docs/constitution.md`, `README.md` | once per repo |
 | 3 | `/sdd-adopt <path>` | Carries a spec over from a previous system | optional |
 | 4 | `/sdd-specify` | WHAT and WHY (+ wireframe, if it has screens) | |
@@ -189,7 +189,7 @@ docs/
                        readme.md — the product README, written by /sdd-init
 specs/
   INDEX.md             every spec, its status, its consumers
-  014-password-reset/
+  NNN-slug/
     spec.md
     wireframe.html     only when the feature has screens
 ```

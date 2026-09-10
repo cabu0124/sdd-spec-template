@@ -1,0 +1,29 @@
+# Internal doc links broke silently until this caught it — nine of them, across
+# both templates. Offline only: a live URL is a different problem with a
+# different failure mode (rate limits, transient outages), and not what broke
+# here. docs/templates/ is excluded because its links are placeholders on
+# purpose — NNN-slug never resolves.
+
+name: Links
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check internal links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --offline --no-progress
+            --exclude-path docs/templates
+            '**/*.md'
+          fail: true
