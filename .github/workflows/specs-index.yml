@@ -1,14 +1,14 @@
-# Three rules that were only prose until now: every spec carries a valid status,
-# specs/INDEX.md agrees with it, and this repository holds no plans or task lists.
-# The third is Rule 1 — Specs Only, Spec First — and it is the one that keeps the
-# separation between this repository and the ones that build from it.
+# Three rules that were only prose until now: every spec carries a valid status
+# and no open question when it is approved, specs/INDEX.md agrees with the
+# headers because it is generated from them, and this repository holds no plans
+# or task lists. The third is Rule 1 — Specs Only, Spec First — and it is the one
+# that keeps the separation between this repository and the ones that build
+# from it.
 # See docs/lifecycle.md and AGENTS.md.
 name: Specs
 
 on:
   pull_request:
-    branches: [main, develop]
-  push:
     branches: [main, develop]
 
 permissions:
@@ -23,9 +23,9 @@ jobs:
       - name: Specs Only — no plans, no task lists
         run: |
           set -euo pipefail
-          # Tracked files only: what a contributor committed, not what their agent
-          # left lying around untracked.
-          stray=$(git ls-files '*plan.md' '*tasks.md')
+          # Tracked files only, matched by exact name so a legitimate product
+          # document like docs/product/rollout-plan.md does not trip the rule.
+          stray=$(git ls-files -- 'plan.md' '*/plan.md' 'tasks.md' '*/tasks.md')
           if [ -n "$stray" ]; then
             while read -r f; do
               echo "::error file=$f::a plan or a task list belongs to the repository that builds the spec, never here (AGENTS.md, Rule 1)"
@@ -34,59 +34,8 @@ jobs:
           fi
           echo "No plans or task lists. Specs only."
 
-      - name: Every spec has a valid status, and INDEX.md agrees with it
-        run: |
-          set -euo pipefail
-          # nullglob: this template ships with no specs, and that has to pass.
-          shopt -s nullglob
+      - name: specs/INDEX.md matches the spec headers
+        run: scripts/spec-index.sh --check
 
-          index=specs/INDEX.md
-          valid='draft review approved done superseded'
-          failed=0
-          checked=0
-
-          for dir in specs/*/; do
-            slug=$(basename "$dir")
-            spec="${dir%/}/spec.md"
-
-            if [ ! -f "$spec" ]; then
-              echo "::error::specs/$slug has no spec.md"
-              failed=1
-              continue
-            fi
-            checked=$((checked + 1))
-
-            status=$(sed -n 's/^- \*\*Status:\*\*[[:space:]]*\([a-z]*\).*/\1/p' "$spec" | head -n1)
-            if [ -z "$status" ]; then
-              echo "::error file=$spec::no '- **Status:** <status>' line in the header"
-              failed=1
-              continue
-            fi
-            if [[ " $valid " != *" $status "* ]]; then
-              echo "::error file=$spec::status '$status' is not one of: $valid (docs/lifecycle.md)"
-              failed=1
-              continue
-            fi
-
-            # The row is the one whose first cell links to this spec.
-            row=$(grep -F "]($slug/spec.md)" "$index" || true)
-            if [ -z "$row" ]; then
-              echo "::error file=$index::specs/$slug has no row. The index is the product-facing catalogue — /sdd-specify and /sdd-status keep it in step."
-              failed=1
-              continue
-            fi
-
-            listed=$(awk -F'|' '{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $3); print $3}' <<<"$row")
-            if [ "$listed" != "$status" ]; then
-              echo "::error file=$index::specs/$slug is '$status' in its header but '$listed' in the index. The header wins (docs/lifecycle.md) — fix the row."
-              failed=1
-            fi
-          done
-
-          [ "$failed" -eq 0 ] || exit 1
-
-          if [ "$checked" -eq 0 ]; then
-            echo "No specs yet."
-          else
-            echo "$checked spec(s): status valid and matching the index."
-          fi
+      - name: Every spec's status, id, placeholders and open questions are clean
+        run: scripts/spec-check.sh
