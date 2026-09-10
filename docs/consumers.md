@@ -26,6 +26,13 @@ repository at once.
 header. `/sdd-plan` in a consuming repo refuses anything that is not `approved`,
 so the line is machine-read as much as it is human-read.
 
+**Stable bytes.** A consumer copies the spec verbatim and records a `sha256` of
+what it copied, so two consumers syncing the same spec must see the same bytes —
+and a spec whose line endings depend on who committed it does not. `.gitattributes`
+stores and checks out everything here as LF, and specs are read at a ref with
+`git show` rather than from a working tree. Without both, a mirror check fails
+downstream on a spec nobody edited, in a repository we cannot see.
+
 **Nothing but WHAT.** No endpoint, no framework, no schema, no repository name in
 a requirement. A consumer that has to strip technology out of a spec to plan
 against it is being handed a decision that was not ours to make.

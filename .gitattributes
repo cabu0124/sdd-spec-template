@@ -1,0 +1,20 @@
+# Every consumer mirrors these files byte for byte and records a sha256 of what
+# it copied. If the bytes served here depend on the operating system that
+# committed them, two consumers syncing the same spec record two different
+# hashes for the same spec. They do not: everything is stored and checked out LF.
+* text=auto eol=lf
+
+specs/**/spec.md        text eol=lf
+specs/**/wireframe.html text eol=lf
+
+*.sh text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
