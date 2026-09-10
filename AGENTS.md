@@ -45,7 +45,8 @@ Classify the request before writing:
 
 - [ ] Every requirement is testable, and free of technology
 - [ ] Every acceptance criterion names the requirement it verifies
-- [ ] `## Open questions` is empty before `status: approved`, and `specs/INDEX.md` reflects the change
+- [ ] `## Open questions` is empty before `status: approved`, and
+      `specs/INDEX.md` is regenerated with `scripts/spec-index.sh`
 
 ## Read on demand (not upfront)
 
