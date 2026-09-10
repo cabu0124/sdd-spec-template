@@ -1,6 +1,6 @@
 # The next version is derived from the commits on main, never typed by a person.
 # No release branch, no release pull request, nothing to keep in step.
-# See docs/delivery.md.
+# See docs/lifecycle.md.
 name: Release
 
 on:

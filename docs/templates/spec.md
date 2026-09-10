@@ -3,7 +3,8 @@
 <!-- Metadata. Every line is read by a person and some by a machine: keep the
      shapes, fill the values, delete only the lines marked as optional. -->
 
-- **Status:** draft <!-- draft | review | approved | done | superseded — see docs/lifecycle.md -->
+- **Status:** draft
+  <!-- one of: draft, review, approved, done, superseded — see docs/lifecycle.md -->
 - **Created:** YYYY-MM-DD
 - **Updated:** YYYY-MM-DD
 - **Owner:** <who answers questions about this spec>
