@@ -1,7 +1,7 @@
 # Three rules that were only prose until now: every spec carries a valid status,
 # specs/INDEX.md agrees with it, and this repository holds no plans or task lists.
-# The third is Rule 1 — Specs Only — and it is the one that keeps the separation
-# between this repository and the ones that build from it.
+# The third is Rule 1 — Specs Only, Spec First — and it is the one that keeps the
+# separation between this repository and the ones that build from it.
 # See docs/lifecycle.md and AGENTS.md.
 name: Specs
 

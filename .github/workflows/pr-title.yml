@@ -1,6 +1,6 @@
 # Conventional Commits, enforced on the pull request title. With squash merge
 # the title becomes the commit, so this is what the release job later reads.
-# See docs/delivery.md.
+# See docs/lifecycle.md.
 name: PR title
 
 on:

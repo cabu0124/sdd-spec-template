@@ -63,11 +63,20 @@ repositories honest about the same document.
   hold the summary, and consumers pin to a commit or a tag — see
   `docs/consumers.md`.
 
-## Releases as pinning points
+## Versioning
 
 Merges to `main` are tagged and released by `.github/workflows/release.yml`,
-from the pull request titles. Those tags are what a consuming repository pins to
-when it wants a reviewed set of specs rather than the moving branch:
+from the pull request titles. Nobody types a version number — the bump comes
+from the type on the title:
+
+| Pull request title | Bump |
+| --- | --- |
+| `<type>!:` or a `BREAKING CHANGE:` footer | major |
+| `feat(NNN): …` | minor |
+| `fix(NNN): …` or `perf(NNN): …` | patch |
+
+Those tags are what a consuming repository pins to when it wants a reviewed set
+of specs rather than the moving branch:
 
 ```yaml
 # in the consumer's .sdd/config.yml
@@ -75,8 +84,7 @@ ref: v1.4.0   # instead of: main
 ```
 
 Pull request titles follow Conventional Commits, with the spec number as the
-scope — `feat(014): password reset spec`, `fix(014): clarify R3`. Nobody types a
-version number.
+scope — `feat(014): password reset spec`, `fix(014): clarify R3`.
 
 Branches are the same two as everywhere else: `feature/*` and `fix/*` into
 `develop`, `develop` into `main`. There are no feature flags here — a spec is not
