@@ -7,6 +7,7 @@
 # criterion that names a requirement the spec actually states.
 #
 #   scripts/spec-check.sh                       # every spec under specs/
+#   scripts/spec-check.sh --root docs/specs     # every spec in a project repo
 #   scripts/spec-check.sh specs/014-password-reset
 #
 # See docs/lifecycle.md.
@@ -16,6 +17,27 @@ set -euo pipefail
 if root=$(git rev-parse --show-toplevel 2>/dev/null); then
   cd "$root"
 fi
+
+spec_root=specs
+dirs=()
+dir_count=0
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --root)
+      shift
+      [ "$#" -gt 0 ] || { echo "spec-check: --root needs a directory" >&2; exit 2; }
+      spec_root=${1%/}
+      ;;
+    --help|-h)
+      awk 'NR > 1 && /^#/ { sub(/^#[[:space:]]?/, ""); print; next } NR > 1 { exit }' "$0"
+      exit 0
+      ;;
+    -*) echo "spec-check: unknown option: $1" >&2; exit 2 ;;
+    *) dirs+=("${1%/}"); dir_count=$((dir_count + 1)) ;;
+  esac
+  shift
+done
 
 field() {
   sed -n "s/^- \*\*$2:\*\*[[:space:]]*//p" "$1" \
@@ -53,11 +75,13 @@ failed=0
 checked=0
 
 check_one() {
-  local dir=$1 spec slug status successor reqs refs ref duplicate
+  local dir=$1 spec slug status successor reqs refs ref duplicate is_mirror
   local acs ledger_acs ac evidence verified_at consumers ledger_cols criterion_lines
   dir="${dir%/}"
   spec="$dir/spec.md"
   slug=$(basename "$dir")
+  is_mirror=0
+  [ -f "$dir/spec.link.yml" ] && is_mirror=1
 
   if [ ! -f "$spec" ]; then
     echo "::error::$dir has no spec.md"
@@ -99,13 +123,15 @@ check_one() {
     if [ -z "$successor" ]; then
       echo "::error file=$spec::status is superseded but Superseded by: is empty"
       failed=1
-    elif [ ! -f "specs/$successor/spec.md" ]; then
-      echo "::error file=$spec::Superseded by: names '$successor', which is not a spec in specs/"
+    elif [ "$is_mirror" -eq 1 ]; then
+      : # The owner validates the graph; a consumer may not mirror the successor.
+    elif [ ! -f "$spec_root/$successor/spec.md" ]; then
+      echo "::error file=$spec::Superseded by: names '$successor', which is not a spec in $spec_root/"
       failed=1
-    elif [ "$(field "specs/$successor/spec.md" Supersedes)" != "$slug" ]; then
+    elif [ "$(field "$spec_root/$successor/spec.md" Supersedes)" != "$slug" ]; then
       # Recorded on the retired spec alone, the chain is invisible from the
       # successor — which is the end a consumer arrives at.
-      echo "::error file=specs/$successor/spec.md::this spec supersedes $slug, but its Supersedes: does not say so"
+      echo "::error file=$spec_root/$successor/spec.md::this spec supersedes $slug, but its Supersedes: does not say so"
       failed=1
     fi
   fi
@@ -180,6 +206,7 @@ check_one() {
     # More than one consumer and no ledger: every repository passed its own
     # slice and nobody checked the product they add up to.
     consumers=$(field "$spec" Consumers)
+    [ -n "$consumers" ] || consumers=$(field "$spec" Repos)
     if [ -z "$ledger_acs" ] && [ "$(printf '%s' "$consumers" | grep -c '·')" -gt 0 ]; then
       echo "::error file=$spec::status is done and this spec has more than one consumer, but it has no ## Verification ledger (docs/lifecycle.md)"
       failed=1
@@ -208,8 +235,10 @@ check_one() {
 }
 
 shopt -s nullglob
-if [ "$#" -eq 0 ]; then
-  set -- specs/*/
+if [ "$dir_count" -eq 0 ]; then
+  set -- "$spec_root"/*/
+else
+  set -- "${dirs[@]}"
 fi
 
 for dir in "$@"; do
@@ -221,7 +250,7 @@ done
 # what a consumer's spec.link.yml records. Scan the whole directory for it
 # whatever this run was asked to check.
 dupes=$(
-  for dir in specs/*/; do
+  for dir in "$spec_root"/*/; do
     [ -f "${dir%/}/spec.md" ] || continue
     basename "$dir" | sed -n 's/^\([0-9][0-9]*\)-.*/\1/p'
   done | sort | uniq -d

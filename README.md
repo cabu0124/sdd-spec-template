@@ -195,6 +195,7 @@ specs/
 scripts/
   sdd-onboard.sh       deterministic generator for local agent adapters
   spec-check.sh        validates spec structure and lifecycle gates
+  test-spec-check.sh   exercises the validator contract with isolated fixtures
   spec-index.sh        generates and checks the catalog
   sdd-check.sh         portable local and CI entry point
 ```
