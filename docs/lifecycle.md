@@ -55,6 +55,28 @@ That line is what a consuming repository reads to know its plan may no longer
 hold. It costs one line and it is the only mechanism keeping several
 repositories honest about the same document.
 
+## Verifying a spec that spans repositories
+
+Each repository verifies the criteria its own `plan.md` scoped, and that is the
+right division of labour — but it does not add up to a verified product. A
+frontend passing against a mock and an API passing against its own tests are two
+green repositories, and the journey between them can still be broken by an
+authentication header, a serialisation, or two deployed versions that never met.
+
+So a spec with more than one consumer carries a `## Verification` ledger: one
+row per acceptance criterion, the repository that answers for it, and a link to
+the run that proved it. Two rules make it worth the line it costs:
+
+- **A criterion in nobody's row is a criterion nobody builds.** That gap is
+  invisible from inside any single plan, because each plan only claims what it
+  took — nothing makes the claims add up to the whole.
+- **A criterion that only holds with several repositories running together is
+  the verifier's**, named in the header, and it is proved by an integrated run
+  against named revisions. Never by each side against its own mock.
+
+Evidence is a link. The tests live in the repositories that run them, and
+`/sdd-status` refuses `done` until every row carries one.
+
 ## Numbers, slugs and versions
 
 - `NNN-slug`, zero-padded, **never reused and never renumbered.** The number is

@@ -9,6 +9,7 @@
 - **Updated:** YYYY-MM-DD
 - **Owner:** <who answers questions about this spec>
 - **Consumers:** <repo> · <repo> <!-- repositories expected to implement it; "unknown" is an honest answer -->
+- **Verifier:** <repo> <!-- multi-repo specs: who runs the integrated check and reports it done. Delete when one repository builds all of it -->
 - **US:** <id or link> <!-- the story this comes from, if it has one elsewhere; delete if none -->
 - **Supersedes:** <NNN-slug> <!-- delete if none -->
 - **Superseded by:** <NNN-slug> <!-- delete unless the status is superseded -->
@@ -49,6 +50,27 @@ the product.
 
 - [ ] **AC1** (R1) — Given <context>, when <action>, then <observable result>.
 - [ ] **AC2** (R2) — <...>
+
+## Verification
+
+<Multi-repo specs only. Delete this section when one repository builds the whole
+spec: its plan already answers for every criterion.
+
+Who answers for each acceptance criterion, and what proved it. A criterion in
+nobody's row is a criterion nobody builds, and that is invisible from inside any
+single repository's plan. A criterion that only holds with two repositories
+running together belongs to the verifier, checked against named revisions —
+never to each side against its own mock, which is how two green repositories
+ship a broken product.
+
+Evidence is a link to the run that proved it, in the repository or the pipeline
+that owns it. No test output, no logs and no code are copied here. `/sdd-status`
+reads this table before it will move the spec to `done`.>
+
+| AC | Answered by | Evidence |
+| --- | --- | --- |
+| AC1 | `<repo>` | <link to the run that proved it> |
+| AC2 | `<repo>` · `<repo>` — integrated | — |
 
 ## Non-functional
 

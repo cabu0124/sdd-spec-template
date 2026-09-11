@@ -33,11 +33,27 @@ valid_status() {
   esac
 }
 
+# The ## Verification ledger as "AC<tab>evidence" rows. Absent on a single-repo
+# spec, where the one plan answers for everything.
+ledger() {
+  awk -F'|' '
+    /^## Verification/ { f = 1; next }
+    /^## / { f = 0 }
+    f && /^[[:space:]]*\|/ {
+      ac = $2; ev = $4
+      gsub(/[*`[:space:]]/, "", ac)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", ev)
+      if (ac ~ /^AC[0-9]+$/) print ac "\t" ev
+    }
+  ' "$1"
+}
+
 failed=0
 checked=0
 
 check_one() {
   local dir=$1 spec slug status successor reqs refs ref
+  local acs ledger_acs ac evidence consumers
   dir="${dir%/}"
   spec="$dir/spec.md"
   slug=$(basename "$dir")
@@ -105,6 +121,45 @@ check_one() {
     echo "::error file=$spec::an acceptance criterion names $ref, which is not a requirement in ## Requirements"
     failed=1
   done
+
+  acs=$(awk '/^## Acceptance criteria/{f=1;next} /^## /{f=0} f' "$spec" \
+    | sed -n 's/.*\*\*\(AC[0-9][0-9]*\)\*\*.*/\1/p')
+  ledger_acs=$(ledger "$spec" | cut -f1)
+
+  # The ledger and the criteria have to describe the same list, or the spec
+  # says one thing and the completion record says another.
+  if [ -n "$ledger_acs" ]; then
+    for ac in $acs; do
+      printf '%s\n' "$ledger_acs" | grep -qx "$ac" && continue
+      echo "::error file=$spec::$ac has no row in ## Verification, so no repository answers for it"
+      failed=1
+    done
+    for ac in $ledger_acs; do
+      printf '%s\n' "$acs" | grep -qx "$ac" && continue
+      echo "::error file=$spec::## Verification names $ac, which is not an acceptance criterion"
+      failed=1
+    done
+  fi
+
+  if [ "$status" = done ]; then
+    # More than one consumer and no ledger: every repository passed its own
+    # slice and nobody checked the product they add up to.
+    consumers=$(field "$spec" Consumers)
+    if [ -z "$ledger_acs" ] && [ "$(printf '%s' "$consumers" | grep -c '·')" -gt 0 ]; then
+      echo "::error file=$spec::status is done and this spec has more than one consumer, but it has no ## Verification ledger (docs/lifecycle.md)"
+      failed=1
+    fi
+
+    while IFS="$(printf '\t')" read -r ac evidence; do
+      [ -n "$ac" ] || continue
+      case "$evidence" in
+        ''|'—'|'-'|no|pending|TBD)
+          echo "::error file=$spec::status is done but $ac carries no evidence in ## Verification"
+          failed=1
+          ;;
+      esac
+    done < <(ledger "$spec")
+  fi
 }
 
 shopt -s nullglob
@@ -141,5 +196,5 @@ fi
 if [ "$checked" -eq 0 ]; then
   echo "No specs yet."
 else
-  echo "$checked spec(s): statuses, ids, placeholders, open questions, supersessions and criteria all clean."
+  echo "$checked spec(s): statuses, ids, placeholders, open questions, supersessions, criteria and verification all clean."
 fi
