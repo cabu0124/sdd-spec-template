@@ -192,6 +192,11 @@ specs/
   NNN-slug/
     spec.md
     wireframe.html     only when the feature has screens
+scripts/
+  sdd-onboard.sh       deterministic generator for local agent adapters
+  spec-check.sh        validates spec structure and lifecycle gates
+  spec-index.sh        generates and checks the catalog
+  sdd-check.sh         portable local and CI entry point
 ```
 
 That is the whole repository. `onboard` adds, **outside version control**, the

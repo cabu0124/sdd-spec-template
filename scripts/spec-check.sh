@@ -53,8 +53,8 @@ failed=0
 checked=0
 
 check_one() {
-  local dir=$1 spec slug status successor reqs refs ref
-  local acs ledger_acs ac evidence verified_at consumers ledger_cols
+  local dir=$1 spec slug status successor reqs refs ref duplicate
+  local acs ledger_acs ac evidence verified_at consumers ledger_cols criterion_lines
   dir="${dir%/}"
   spec="$dir/spec.md"
   slug=$(basename "$dir")
@@ -85,11 +85,11 @@ check_one() {
     failed=1
   fi
 
-  if [ "$status" = approved ]; then
+  if [ "$status" = approved ] || [ "$status" = done ]; then
     # Open questions are checkboxes; a resolved one is struck through, not
     # deleted, so an unchecked box — not any text in the section — is the gate.
     if awk '/^## Open questions/{f=1;next} /^## /{f=0} f' "$spec" | grep -q '^- \[ \]'; then
-      echo "::error file=$spec::status is approved but ## Open questions still has an unchecked item (docs/lifecycle.md)"
+      echo "::error file=$spec::status is $status but ## Open questions still has an unchecked item (docs/lifecycle.md)"
       failed=1
     fi
   fi
@@ -114,17 +114,42 @@ check_one() {
   # requirement has to exist: `- [ ] **AC1** (R1) — ...`.
   reqs=$(awk '/^## Requirements/{f=1;next} /^## /{f=0} f' "$spec" \
     | sed -n 's/^-[[:space:]]*\*\*\(R[0-9][0-9]*\)\*\*.*/\1/p')
-  refs=$(awk '/^## Acceptance criteria/{f=1;next} /^## /{f=0} f' "$spec" \
+  criterion_lines=$(awk '/^## Acceptance criteria/{f=1;next} /^## /{f=0} f && /\*\*AC[0-9][0-9]*\*\*/' "$spec")
+  refs=$(printf '%s\n' "$criterion_lines" \
     | sed -n 's/.*\*\*AC[0-9][0-9]*\*\*[[:space:]]*(\([^)]*\)).*/\1/p' \
     | tr ',' '\n' | tr -d '[:blank:]' | tr -d '\r')
+
+  if printf '%s\n' "$criterion_lines" | grep -qvE '\*\*AC[0-9]+\*\*[[:space:]]*\(R[0-9]+([[:space:]]*,[[:space:]]*R[0-9]+)*\)'; then
+    echo "::error file=$spec::every acceptance criterion must name one or more requirements as (R1) or (R1, R2)"
+    failed=1
+  fi
+
+  duplicate=$(printf '%s\n' "$reqs" | sed '/^$/d' | sort | uniq -d)
+  if [ -n "$duplicate" ]; then
+    echo "::error file=$spec::duplicate requirement id(s): $(printf '%s' "$duplicate" | tr '\n' ' ')"
+    failed=1
+  fi
+
+  acs=$(printf '%s\n' "$criterion_lines" \
+    | sed -n 's/.*\*\*\(AC[0-9][0-9]*\)\*\*.*/\1/p')
+  duplicate=$(printf '%s\n' "$acs" | sed '/^$/d' | sort | uniq -d)
+  if [ -n "$duplicate" ]; then
+    echo "::error file=$spec::duplicate acceptance criterion id(s): $(printf '%s' "$duplicate" | tr '\n' ' ')"
+    failed=1
+  fi
+
   for ref in $refs; do
     printf '%s\n' "$reqs" | grep -qx "$ref" && continue
     echo "::error file=$spec::an acceptance criterion names $ref, which is not a requirement in ## Requirements"
     failed=1
   done
 
-  acs=$(awk '/^## Acceptance criteria/{f=1;next} /^## /{f=0} f' "$spec" \
-    | sed -n 's/.*\*\*\(AC[0-9][0-9]*\)\*\*.*/\1/p')
+  for ref in $reqs; do
+    printf '%s\n' "$refs" | grep -qx "$ref" && continue
+    echo "::error file=$spec::$ref has no acceptance criterion"
+    failed=1
+  done
+
   ledger_acs=$(ledger "$spec" | cut -f1)
 
   # The ledger and the criteria have to describe the same list, or the spec
