@@ -75,9 +75,11 @@ and name that file when you report it.
 7. Adapt `docs/lifecycle.md` where the answers contradict it: who approves, and
    whether consumers track a branch or pin a tag. It ships with a default, not
    with a fact about this product. Not on GitHub Actions: delete
-   `.github/workflows/` and name the CI that runs the same checks — a workflow
-   for a CI nobody uses is worse than no workflow. Never invent a process nobody
-   follows; "not decided yet" is an answer. Point `.github/CODEOWNERS` at a
+   the template workflows only after naming the CI configuration that runs
+   `scripts/sdd-check.sh`; keep that script as the portable entry point. A
+   workflow for a CI nobody uses is worse than no workflow, but deleting it is
+   not a CI integration. Never invent a process nobody follows; "not decided
+   yet" is an answer. Point `.github/CODEOWNERS` at a
    reviewer who actually has access, or delete it — a file naming someone
    without access asks for a review GitHub will silently never request.
 8. Delete any spec directory that is not this product's — `specs/INDEX.md`
@@ -93,6 +95,9 @@ and name that file when you report it.
 10. If you found a previous spec system, list its specs and stop there. Do not
     convert them — say how many there are and that `/sdd-adopt <path>` takes them
     one at a time.
+11. Run `scripts/sdd-doctor.sh` and fix every error before reporting setup as
+   complete. It diagnoses local tools and generated adapters without installing
+   anything or contacting a service.
 
 ## Writes
 

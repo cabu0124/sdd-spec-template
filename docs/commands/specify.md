@@ -69,7 +69,12 @@ of being guessed. That is what the section is for, and `/sdd-clarify` closes it.
 6. One spec per product story, whole, however many repositories it takes. Do not
    split the work between repositories and do not write a contract — both are
    decided in the consuming repositories' plans. `## Consumers` names who is
-   expected to implement it; it documents, it does not assign.
+   expected to implement it; it documents, it does not assign. When it names
+   more than one, fill `## Verification` — a row per acceptance criterion and
+   the repository that answers for it — and name the `Verifier:` who runs the
+   criteria that only hold with several repositories running together. Leave the
+   evidence column empty; it is filled as each one passes. A single-repo spec
+   deletes the section and the header line.
 7. Regenerate `specs/INDEX.md`: `scripts/spec-index.sh`.
 8. Report the requirements and anything left open.
 
