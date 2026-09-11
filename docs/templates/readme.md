@@ -36,7 +36,7 @@ Start at [`specs/INDEX.md`](specs/INDEX.md).
 | --- | --- |
 | `draft` · `review` | Being written or awaiting sign-off. Not to be built |
 | `approved` | Signed off. This is what gets built |
-| `done` | Every repository has met the criteria it took |
+| `done` | Delivered: every repository met the criteria it took. Still published, so a repository joining later builds against it |
 | `superseded` | Replaced — the header names the successor |
 
 ```mermaid

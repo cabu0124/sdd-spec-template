@@ -23,8 +23,9 @@ this repository                     a development repository
 repository at once.
 
 **A greppable status.** `- **Status:** approved` on its own line in the spec
-header. `/sdd-plan` in a consuming repo refuses anything that is not `approved`,
-so the line is machine-read as much as it is human-read.
+header. `/sdd-plan` in a consuming repo refuses anything that is not published —
+`draft`, `review` and `superseded` — so the line is machine-read as much as it
+is human-read.
 
 **Stable bytes.** A consumer copies the spec verbatim and records a `sha256` of
 what it copied, so two consumers syncing the same spec must see the same bytes —
