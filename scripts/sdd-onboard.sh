@@ -34,6 +34,8 @@ done
 [ -f AGENTS.md ] || die "AGENTS.md not found" 2
 [ -d docs/commands ] || die "docs/commands not found" 2
 
+shopt -s nullglob
+
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT
 
@@ -55,6 +57,37 @@ argument_hint() {
 
 escape_double_quotes() {
   sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+# One value from a file's own YAML frontmatter, e.g. `description` or `applyTo`.
+frontmatter_field() {
+  local file=$1 key=$2
+  awk -v key="$key" '
+    /^---$/ { c++; next }
+    c == 1 && $0 ~ "^" key ":" { sub("^" key ":[ \t]*", ""); gsub(/^"|"$/, ""); print; exit }
+  ' "$file"
+}
+
+# Everything after a file's own frontmatter, unchanged.
+body_after_frontmatter() {
+  awk '/^---$/ { c++; next } c >= 2 { print }' "$1"
+}
+
+# A managed file whose frontmatter must stay on line 1 gets the marker after
+# its closing `---` instead of before it.
+inject_marker() {
+  local file=$1
+  awk -v marker="<!-- $marker -->" '
+    /^---$/ { c++; print; if (c == 2) { print ""; print marker; print "" }; next }
+    { print }
+  ' "$file"
+}
+
+# Marker plus body, for a file whose original frontmatter was replaced by a
+# freshly generated one rather than copied.
+marker_then_body() {
+  printf '\n<!-- %s -->\n\n' "$marker"
+  body_after_frontmatter "$1"
 }
 
 write_adapter() {
@@ -142,6 +175,93 @@ write_commands() {
   done
 }
 
+# One subagent or chat mode per file under docs/agents/. Tools with no such
+# concept (cursor, gemini) are skipped rather than approximated.
+write_agents() {
+  local tool=$1 file slug desc target
+  for file in docs/agents/*.md; do
+    slug=$(basename "$file" .md)
+    desc=$(frontmatter_field "$file" description)
+    case "$tool" in
+      claude)
+        target=".claude/agents/$slug.md"
+        mkdir -p "$stage/.claude/agents"
+        {
+          printf '%s\n' '---'
+          printf 'name: %s\n' "$slug"
+          printf 'description: "%s"\n' "$(printf '%s' "$desc" | escape_double_quotes)"
+          printf '%s\n' '---'
+          marker_then_body "$file"
+        } > "$stage/$target"
+        ;;
+      copilot)
+        target=".github/chatmodes/$slug.chatmode.md"
+        mkdir -p "$stage/.github/chatmodes"
+        {
+          printf '%s\n' '---'
+          printf 'description: "%s"\n' "$(printf '%s' "$desc" | escape_double_quotes)"
+          printf '%s\n' '---'
+          marker_then_body "$file"
+        } > "$stage/$target"
+        ;;
+    esac
+  done
+}
+
+# One skill directory per docs/skills/<slug>/SKILL.md, copied as-is: its own
+# name/description frontmatter is already what a native skill directory reads.
+write_skills() {
+  local tool=$1 dir slug target
+  for dir in docs/skills/*/; do
+    [ -f "${dir}SKILL.md" ] || continue
+    slug=$(basename "$dir")
+    case "$tool" in
+      claude) target=".claude/skills/$slug/SKILL.md" ;;
+      copilot) target=".github/skills/$slug/SKILL.md" ;;
+      *) continue ;;
+    esac
+    mkdir -p "$stage/$(dirname "$target")"
+    inject_marker "${dir}SKILL.md" > "$stage/$target"
+  done
+}
+
+# One scoped rule per file under docs/standards/, translated to the glob field
+# each tool reads (Copilot `applyTo`, Cursor `globs`). Tools with no per-file
+# scoping (claude, gemini) are skipped: an always-on standard belongs in AGENTS.md.
+write_standards() {
+  local tool=$1 file slug desc applyto target
+  for file in docs/standards/*.md; do
+    slug=$(basename "$file" .md)
+    desc=$(frontmatter_field "$file" description)
+    applyto=$(frontmatter_field "$file" applyTo)
+    case "$tool" in
+      copilot)
+        target=".github/instructions/$slug.instructions.md"
+        mkdir -p "$stage/.github/instructions"
+        {
+          printf '%s\n' '---'
+          printf 'description: "%s"\n' "$(printf '%s' "$desc" | escape_double_quotes)"
+          printf 'applyTo: "%s"\n' "$(printf '%s' "$applyto" | escape_double_quotes)"
+          printf '%s\n' '---'
+          marker_then_body "$file"
+        } > "$stage/$target"
+        ;;
+      cursor)
+        target=".cursor/rules/$slug.mdc"
+        mkdir -p "$stage/.cursor/rules"
+        {
+          printf '%s\n' '---'
+          printf 'description: "%s"\n' "$(printf '%s' "$desc" | escape_double_quotes)"
+          printf 'globs: "%s"\n' "$(printf '%s' "$applyto" | escape_double_quotes)"
+          printf '%s\n' 'alwaysApply: false'
+          printf '%s\n' '---'
+          marker_then_body "$file"
+        } > "$stage/$target"
+        ;;
+    esac
+  done
+}
+
 install_generated() {
   local source=$1 target=${1#"$stage"/}
   if [ -f "$target" ] && ! grep -Fq "$marker" "$target"; then
@@ -162,6 +282,9 @@ install_generated() {
 for tool in "${tools[@]}"; do
   write_adapter "$tool"
   write_commands "$tool"
+  write_agents "$tool"
+  write_skills "$tool"
+  write_standards "$tool"
 done
 
 failed=0

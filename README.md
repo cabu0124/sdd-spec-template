@@ -185,8 +185,12 @@ docs/
   lifecycle.md         statuses, amendments, versions, releases
   consumers.md         the contract with development repositories
   product/             glossary and product documentation
+  agents/              roles for a subagent or chat mode — ships empty
+  skills/              model-invoked how-to guides, one SKILL.md per dir — ships empty
+  standards/           always-on rules scoped to a file glob — ships empty
   templates/           spec.md · wireframe.html · index.md
                        readme.md — the product README, written by /sdd-init
+                       agent.md · skill.md · standard.md — blank templates for the above
 specs/
   INDEX.md             every spec, its status, its consumers
   NNN-slug/
@@ -202,7 +206,7 @@ scripts/
 ```
 
 That is the whole repository. `onboard` adds, **outside version control**, the
-adapter your tool needs and its `sdd-*` command files.
+adapter your tool needs and its `sdd-*` command, agent, skill and standard files.
 
 </details>
 
