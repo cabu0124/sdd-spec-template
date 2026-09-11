@@ -217,9 +217,11 @@ stateDiagram-v2
   superseded --> [*]
 ```
 
-`approved` is the only status a development repository may build against: their
-`/sdd-plan` refuses anything else. **Only the user approves**, and
-`## Open questions` must be empty first.
+A development repository builds against a **published** spec: `approved`, or
+`done` once the work was delivered. Their `/sdd-plan` refuses `draft` and
+`review`, which are still being written, and `superseded`, which the successor
+replaced. **Only the user approves**, and `## Open questions` must be empty
+first.
 
 An approved spec is **published**: consumers have mirrored it. Changing it means
 an amendment line and a word about who has to re-sync — and when the decision

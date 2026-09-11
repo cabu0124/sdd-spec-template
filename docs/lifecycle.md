@@ -12,14 +12,17 @@ reads it.
 | `draft` | Being written. Requirements may still change wholesale | the author | read it, plan nothing |
 | `review` | Complete and awaiting sign-off. `## Open questions` must be empty | the author | read it, plan nothing |
 | `approved` | Signed off. The published contract | **the user only** | sync it, plan, build |
-| `done` | Every consuming repository has met the criteria it took | the user | nothing changes |
+| `done` | Published, and every consuming repository has met the criteria it took | the user | keep building; a repository joining later still syncs and plans |
 | `superseded` | Replaced by another spec, which is named in the header | the user | stop, and read the successor |
 
 Two rules give the statuses their meaning:
 
-- **`approved` is the only status a development repository may build against.**
-  `/sdd-plan` in a consuming repo refuses anything else. That refusal is the
-  whole point of the gate.
+- **A development repository builds against a published spec**, and a spec is
+  published from `approved` onwards. `/sdd-plan` in a consuming repo refuses
+  `draft` and `review`, because they are still being written, and `superseded`,
+  because the successor replaced them. It accepts `done`: that status records
+  that the work was delivered, not that the contract expired — a repository
+  joining the product a year later still has to build against it.
 - **Only the user approves.** An agent writes, clarifies and reports — it never
   sets `approved`. `## Open questions` must be empty first.
 
@@ -101,8 +104,11 @@ consumer is ever typed.
 The `specs-index` job in `.github/workflows/specs-index.yml` enforces that on
 every pull request: `scripts/spec-index.sh --check` fails the build if
 `specs/INDEX.md` is not what the headers would generate, `scripts/spec-check.sh`
-fails it if an `approved` spec still has an unchecked open question, an id is
-not `NNN-slug` zero-padded, a placeholder is still committed, or a `superseded`
-spec names no successor — and the Rule 1 check still refuses a `plan.md` or a
-`tasks.md` anywhere in the repository. Consumers read this branch while they
-build, so it cannot hold a catalogue that lies about what is approved.
+fails it if a status is not one of the five, an `approved` spec still has an
+unchecked open question, an id is not `NNN-slug` zero-padded or repeats a
+number another spec already has, a placeholder is still committed, a
+supersession is recorded on only one of the two specs, or an acceptance
+criterion names a requirement that does not exist — and the Rule 1 check still
+refuses a `plan.md` or a `tasks.md` anywhere in the repository. Consumers read
+this branch while they build, so it cannot hold a catalogue that lies about
+what is approved.
