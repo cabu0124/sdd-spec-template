@@ -33,17 +33,18 @@ valid_status() {
   esac
 }
 
-# The ## Verification ledger as "AC<tab>evidence" rows. Absent on a single-repo
-# spec, where the one plan answers for everything.
+# The ## Verification ledger as "AC<tab>verified-at<tab>evidence" rows. Absent
+# on a single-repo spec, where the one plan answers for everything.
 ledger() {
   awk -F'|' '
     /^## Verification/ { f = 1; next }
     /^## / { f = 0 }
     f && /^[[:space:]]*\|/ {
-      ac = $2; ev = $4
+      ac = $2; at = $4; ev = $5
       gsub(/[*`[:space:]]/, "", ac)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", at)
       gsub(/^[[:space:]]+|[[:space:]]+$/, "", ev)
-      if (ac ~ /^AC[0-9]+$/) print ac "\t" ev
+      if (ac ~ /^AC[0-9]+$/) print ac "\t" at "\t" ev
     }
   ' "$1"
 }
@@ -53,7 +54,7 @@ checked=0
 
 check_one() {
   local dir=$1 spec slug status successor reqs refs ref
-  local acs ledger_acs ac evidence consumers
+  local acs ledger_acs ac evidence verified_at consumers ledger_cols
   dir="${dir%/}"
   spec="$dir/spec.md"
   slug=$(basename "$dir")
@@ -129,6 +130,15 @@ check_one() {
   # The ledger and the criteria have to describe the same list, or the spec
   # says one thing and the completion record says another.
   if [ -n "$ledger_acs" ]; then
+    # A ledger written before `Verified at` existed reads its evidence into the
+    # wrong column. Say that, rather than reporting evidence the row plainly has
+    # as missing.
+    ledger_cols=$(awk -F'|' '/^## Verification/{f=1;next} /^## /{f=0} f && /^[[:space:]]*\|/ {print NF; exit}' "$spec")
+    if [ "${ledger_cols:-0}" -lt 6 ]; then
+      echo "::error file=$spec::## Verification has three columns and now needs four: AC, Answered by, Verified at, Evidence (docs/lifecycle.md)"
+      failed=1
+    fi
+
     for ac in $acs; do
       printf '%s\n' "$ledger_acs" | grep -qx "$ac" && continue
       echo "::error file=$spec::$ac has no row in ## Verification, so no repository answers for it"
@@ -150,11 +160,21 @@ check_one() {
       failed=1
     fi
 
-    while IFS="$(printf '\t')" read -r ac evidence; do
+    while IFS="$(printf '\t')" read -r ac verified_at evidence; do
       [ -n "$ac" ] || continue
+      [ "${ledger_cols:-6}" -ge 6 ] || break
       case "$evidence" in
         ''|'—'|'-'|no|pending|TBD)
           echo "::error file=$spec::status is done but $ac carries no evidence in ## Verification"
+          failed=1
+          ;;
+      esac
+      # A link alone says something was verified, not that today's wording was:
+      # a consumer pinned to an older revision reports a pass for text that has
+      # since changed, and the row reads exactly like an honest one.
+      case "$verified_at" in
+        ''|'—'|'-'|no|pending|TBD)
+          echo "::error file=$spec::status is done but $ac does not say which revision of this spec its evidence was produced against"
           failed=1
           ;;
       esac

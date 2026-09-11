@@ -34,7 +34,7 @@ Check before writing, and report each check with its result:
 | --- | --- |
 | `review` | Every requirement is testable, every acceptance criterion names a requirement, no technology or repository has leaked into a requirement |
 | `approved` | It is in `review`, `## Open questions` is empty, and the user says so |
-| `done` | `## Verification` accounts for every acceptance criterion and each row carries its evidence. Criteria that only hold with several repositories running together need the verifier's integrated run, not two separate green reports. You cannot verify that from here — ask, and name who has not answered |
+| `done` | `## Verification` accounts for every acceptance criterion, and each row carries its evidence and the revision of this spec that evidence was produced against. A row whose revision predates the wording it claims to prove is not evidence: the consumer that reported it was pinned to an older spec, and it re-syncs and re-verifies before this moves. Criteria that only hold with several repositories running together need the verifier's integrated run, not two separate green reports. You cannot verify any of it from here — ask, and name who has not answered |
 | `superseded` | The successor spec exists, is at least `review`, and names this one under `Supersedes:` |
 | back to `draft` | Nothing — but if it was `approved`, it is a published retraction: say who has to stop |
 

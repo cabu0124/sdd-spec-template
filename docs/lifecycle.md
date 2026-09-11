@@ -64,8 +64,9 @@ green repositories, and the journey between them can still be broken by an
 authentication header, a serialisation, or two deployed versions that never met.
 
 So a spec with more than one consumer carries a `## Verification` ledger: one
-row per acceptance criterion, the repository that answers for it, and a link to
-the run that proved it. Two rules make it worth the line it costs:
+row per acceptance criterion, the repository that answers for it, the revision
+of this spec the evidence was produced against, and a link to the run that
+proved it. Three rules make it worth the lines it costs:
 
 - **A criterion in nobody's row is a criterion nobody builds.** That gap is
   invisible from inside any single plan, because each plan only claims what it
@@ -73,6 +74,10 @@ the run that proved it. Two rules make it worth the line it costs:
 - **A criterion that only holds with several repositories running together is
   the verifier's**, named in the header, and it is proved by an integrated run
   against named revisions. Never by each side against its own mock.
+- **Evidence names the revision it was produced against.** Consumers pin to
+  different refs on purpose, so a repository sitting on an older tag can report
+  an honest pass for wording that has since changed. Without the revision, that
+  row is indistinguishable from one that proves today's criterion.
 
 Evidence is a link. The tests live in the repositories that run them, and
 `/sdd-status` refuses `done` until every row carries one.

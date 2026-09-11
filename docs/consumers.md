@@ -58,11 +58,13 @@ build: `/sdd-clarify` in *this* repository, so the answer reaches everyone.
 **Their own numbering.** `014-password-reset` here can be `007-password-reset`
 there. The slug is the join key; the numbers are local.
 
-**Evidence for the criteria they took.** A link to the run that proved each one,
-recorded in `## Verification` when the spec spans repositories. The tests and
-their output stay in the repository or the pipeline that owns them — what
-arrives here is a link and a name, which is what makes `done` mean the product
-works rather than that everyone reported separately.
+**Evidence for the criteria they took.** A link to the run that proved each one
+and the spec revision it was produced against — `source.commit` in their
+`spec.link.yml` — recorded in `## Verification` when the spec spans
+repositories. The tests and their output stay in the repository or the pipeline
+that owns them. What arrives here is a link, a name and a revision, which is
+what makes `done` mean the product works rather than that everyone reported
+separately.
 
 ## What never enters this repository
 

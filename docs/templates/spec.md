@@ -65,12 +65,18 @@ ship a broken product.
 
 Evidence is a link to the run that proved it, in the repository or the pipeline
 that owns it. No test output, no logs and no code are copied here. `/sdd-status`
-reads this table before it will move the spec to `done`.>
+reads this table before it will move the spec to `done`.
 
-| AC | Answered by | Evidence |
-| --- | --- | --- |
-| AC1 | `<repo>` | <link to the run that proved it> |
-| AC2 | `<repo>` · `<repo>` — integrated | — |
+`Verified at` is the revision of **this spec** the evidence was produced
+against — a tag or a commit. Without it a row proves that something was
+verified, not that the criterion as it reads today was: a consumer pinned to an
+older revision reports a pass for wording that has since changed, and the row
+looks identical to an honest one.>
+
+| AC | Answered by | Verified at | Evidence |
+| --- | --- | --- | --- |
+| AC1 | `<repo>` | <tag or commit of this spec> | <link to the run that proved it> |
+| AC2 | `<repo>` · `<repo>` — integrated | — | — |
 
 ## Non-functional
 
