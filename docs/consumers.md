@@ -7,7 +7,7 @@ against them. That split is the whole architecture, and this file is the seam.
 ```text
 this repository                     a development repository
   specs/014-password-reset/
-    spec.md          ──────────▶      docs/specs/007-password-reset/
+    spec.md          ──────────▶      specs/007-password-reset/
     wireframe.html   ──────────▶        spec.md         mirror, byte-identical
                                         wireframe.html  mirror
                                         spec.link.yml   id · ref · commit · sha256
