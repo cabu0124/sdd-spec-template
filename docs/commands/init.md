@@ -95,6 +95,9 @@ and name that file when you report it.
 10. If you found a previous spec system, list its specs and stop there. Do not
     convert them — say how many there are and that `/sdd-adopt <path>` takes them
     one at a time.
+11. Run `scripts/sdd-doctor.sh` and fix every error before reporting setup as
+   complete. It diagnoses local tools and generated adapters without installing
+   anything or contacting a service.
 
 ## Writes
 

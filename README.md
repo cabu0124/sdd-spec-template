@@ -194,6 +194,7 @@ specs/
     wireframe.html     only when the feature has screens
 scripts/
   sdd-onboard.sh       deterministic generator for local agent adapters
+  sdd-doctor.sh        offline diagnosis of tools and agent adapters
   spec-check.sh        validates spec structure and lifecycle gates
   test-spec-check.sh   exercises the validator contract with isolated fixtures
   spec-index.sh        generates and checks the catalog
