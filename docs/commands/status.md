@@ -13,7 +13,7 @@ stop.
 
 - `docs/lifecycle.md` — the transitions, and what each one obliges.
 - The spec in full: header, requirements, acceptance criteria, open questions,
-  amendments.
+  amendments, and `## Verification` when it spans repositories.
 - `specs/INDEX.md` — it has to end up agreeing with the header.
 - The spec's `## Consumers`, when the transition is one they can see.
 
@@ -34,7 +34,7 @@ Check before writing, and report each check with its result:
 | --- | --- |
 | `review` | Every requirement is testable, every acceptance criterion names a requirement, no technology or repository has leaked into a requirement |
 | `approved` | It is in `review`, `## Open questions` is empty, and the user says so |
-| `done` | Every repository in `## Consumers` reports the criteria it took as met. You cannot verify that from here — ask, and name who has not answered |
+| `done` | `## Verification` accounts for every acceptance criterion, and each row carries its evidence and the revision of this spec that evidence was produced against. A row whose revision predates the wording it claims to prove is not evidence: the consumer that reported it was pinned to an older spec, and it re-syncs and re-verifies before this moves. Criteria that only hold with several repositories running together need the verifier's integrated run, not two separate green reports. You cannot verify any of it from here — ask, and name who has not answered |
 | `superseded` | The successor spec exists, is at least `review`, and names this one under `Supersedes:` |
 | back to `draft` | Nothing — but if it was `approved`, it is a published retraction: say who has to stop |
 
@@ -47,7 +47,9 @@ the spec in the same run — that is `/sdd-clarify`.
 2. Stop if a gate fails, or if the transition is the user's to make and they have
    not made it.
 3. Write the new `status:` and the `Updated:` date. On `superseded`, fill
-   `Superseded by:` here and `Supersedes:` in the successor.
+   `Superseded by:` here and `Supersedes:` in the successor. On `done`, record
+   the evidence each consumer reported in `## Verification` — the link, never
+   the output.
 4. Leaving `approved` in any direction — including a change made under it —
    append an amendment line: the date, what changed, and which consumers it
    affects.

@@ -4,6 +4,9 @@
 # or task lists. The third is Rule 1 — Specs Only, Spec First — and it is the one
 # that keeps the separation between this repository and the ones that build
 # from it.
+#
+# All of them run from scripts/sdd-check.sh, so what fails here is what fails
+# on a laptop, with the same message.
 # See docs/lifecycle.md and AGENTS.md.
 name: Specs
 
@@ -20,22 +23,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Specs Only — no plans, no task lists
-        run: |
-          set -euo pipefail
-          # Tracked files only, matched by exact name so a legitimate product
-          # document like docs/product/rollout-plan.md does not trip the rule.
-          stray=$(git ls-files -- 'plan.md' '*/plan.md' 'tasks.md' '*/tasks.md')
-          if [ -n "$stray" ]; then
-            while read -r f; do
-              echo "::error file=$f::a plan or a task list belongs to the repository that builds the spec, never here (AGENTS.md, Rule 1)"
-            done <<<"$stray"
-            exit 1
-          fi
-          echo "No plans or task lists. Specs only."
-
-      - name: specs/INDEX.md matches the spec headers
-        run: scripts/spec-index.sh --check
-
-      - name: Every spec's status, id, placeholders and open questions are clean
-        run: scripts/spec-check.sh
+      - name: Every check this repository runs
+        run: bash scripts/sdd-check.sh

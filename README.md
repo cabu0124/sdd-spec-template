@@ -192,6 +192,13 @@ specs/
   NNN-slug/
     spec.md
     wireframe.html     only when the feature has screens
+scripts/
+  sdd-onboard.sh       deterministic generator for local agent adapters
+  sdd-doctor.sh        offline diagnosis of tools and agent adapters
+  spec-check.sh        validates spec structure and lifecycle gates
+  test-spec-check.sh   exercises the validator contract with isolated fixtures
+  spec-index.sh        generates and checks the catalog
+  sdd-check.sh         portable local and CI entry point
 ```
 
 That is the whole repository. `onboard` adds, **outside version control**, the
@@ -217,9 +224,11 @@ stateDiagram-v2
   superseded --> [*]
 ```
 
-`approved` is the only status a development repository may build against: their
-`/sdd-plan` refuses anything else. **Only the user approves**, and
-`## Open questions` must be empty first.
+A development repository builds against a **published** spec: `approved`, or
+`done` once the work was delivered. Their `/sdd-plan` refuses `draft` and
+`review`, which are still being written, and `superseded`, which the successor
+replaced. **Only the user approves**, and `## Open questions` must be empty
+first.
 
 An approved spec is **published**: consumers have mirrored it. Changing it means
 an amendment line and a word about who has to re-sync — and when the decision
