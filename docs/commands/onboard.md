@@ -1,8 +1,9 @@
 # /sdd-onboard — set up your agent tool for this repo
 
-**Goal.** Generate the local adapter and command files required by the agent
-tools a developer uses. The generated files point to `AGENTS.md` and
-`docs/commands/`; they contain no product decisions of their own.
+**Goal.** Generate the local adapter, command, agent, skill and standard files
+required by the agent tools a developer uses. The generated files point to
+`AGENTS.md`, `docs/commands/`, `docs/agents/`, `docs/skills/` and
+`docs/standards/`; they contain no product decisions of their own.
 
 Runs per developer, not per repository. Re-run it after the `Rule 1` block in
 `AGENTS.md` changes or when adding another tool.
@@ -40,7 +41,8 @@ Which supported tools the developer uses. Native tools that already read
 
 3. Confirm the generated paths are ignored with `git check-ignore`. The shipped
    `.gitignore` covers `CLAUDE.md`, `GEMINI.md`, `.claude/`, `.cursor/`,
-   `.gemini/`, `.github/copilot-instructions.md` and `.github/prompts/`.
+   `.gemini/`, `.github/copilot-instructions.md`, `.github/prompts/`,
+   `.github/chatmodes/`, `.github/skills/` and `.github/instructions/`.
 4. If the generator refuses an existing file, stop. It only updates files with
    its management marker; merge a hand-written customization deliberately
    instead of overwriting it.
@@ -51,6 +53,15 @@ Which supported tools the developer uses. Native tools that already read
 
 - The `Rule 1` block is copied byte-for-byte from `AGENTS.md` into each adapter.
 - One command wrapper is derived from every file under `docs/commands/`.
+- One subagent or chat mode is derived from every file under `docs/agents/`, for
+  the tools that have one (`claude`, `copilot`). `cursor` and `gemini` have no
+  native subagent concept and are skipped rather than approximated.
+- One skill directory is copied as-is from every `docs/skills/<slug>/SKILL.md`,
+  for the tools with a native skill directory (`claude`, `copilot`).
+- One scoped rule is derived from every file under `docs/standards/`, for the
+  tools with per-file scoping (`copilot`'s `applyTo`, `cursor`'s `globs`).
+  `claude` and `gemini` have no such mechanism; a standard that must always
+  apply belongs in `AGENTS.md` instead.
 - Re-running with the same inputs produces the same bytes.
 - `--check` writes nothing and reports missing or stale generated files.
 - A file without the management marker is never overwritten.
@@ -59,6 +70,13 @@ The supported adapters are `CLAUDE.md`, `GEMINI.md`,
 `.github/copilot-instructions.md` and `.cursor/rules/00-spec-first.mdc`. Command
 wrappers are generated under each tool's native command directory. Tools that
 read `AGENTS.md` natively can follow `docs/commands/<name>.md` directly.
+
+| Category | Source | claude | copilot | cursor | gemini |
+| --- | --- | --- | --- | --- | --- |
+| Command | `docs/commands/*.md` | `.claude/commands/` | `.github/prompts/` | `.cursor/commands/` | `.gemini/commands/` |
+| Agent | `docs/agents/*.md` | `.claude/agents/` | `.github/chatmodes/` | — | — |
+| Skill | `docs/skills/<slug>/SKILL.md` | `.claude/skills/` | `.github/skills/` | — | — |
+| Standard | `docs/standards/*.md` | — | `.github/instructions/` | `.cursor/rules/` | — |
 
 ## Does it actually work?
 
@@ -71,7 +89,8 @@ Generation tests formatting; behavior still needs a smoke test:
 
 ## Writes
 
-Generated adapters and command wrappers only. No product content or spec.
+Generated adapters, command wrappers, agent, skill and standard files only. No
+product content or spec.
 
 ## Stops when
 

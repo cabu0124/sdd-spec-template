@@ -7,7 +7,7 @@
 # criterion that names a requirement the spec actually states.
 #
 #   scripts/spec-check.sh                       # every spec under specs/
-#   scripts/spec-check.sh --root docs/specs     # every spec in a project repo
+#   scripts/spec-check.sh --root docs/specs     # a repo that nests specs elsewhere
 #   scripts/spec-check.sh specs/014-password-reset
 #
 # See docs/lifecycle.md.

@@ -60,3 +60,6 @@ Classify the request before writing:
 | Active spec | `specs/<NNN-slug>/` |
 | Artifact structure | `docs/templates/` (incl. `wireframe.html`) |
 | Product language, glossary | `docs/product/` |
+| Roles for a subagent or chat mode | `docs/agents/` |
+| Model-invoked how-to guides | `docs/skills/` |
+| Always-on rules scoped to a file glob | `docs/standards/` |

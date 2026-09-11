@@ -8,4 +8,7 @@
 /.gemini/
 /.github/copilot-instructions.md
 /.github/prompts/
+/.github/chatmodes/
+/.github/skills/
+/.github/instructions/
 /**/*.DS_Store
