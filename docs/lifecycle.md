@@ -124,13 +124,16 @@ with the specs it lists: the header is the only place a status, an owner or a
 consumer is ever typed.
 
 The `specs-index` job in `.github/workflows/specs-index.yml` enforces that on
-every pull request: `scripts/spec-index.sh --check` fails the build if
-`specs/INDEX.md` is not what the headers would generate, `scripts/spec-check.sh`
-fails it if a status is not one of the five, an `approved` spec still has an
-unchecked open question, an id is not `NNN-slug` zero-padded or repeats a
-number another spec already has, a placeholder is still committed, a
-supersession is recorded on only one of the two specs, or an acceptance
-criterion names a requirement that does not exist — and the Rule 1 check still
-refuses a `plan.md` or a `tasks.md` anywhere in the repository. Consumers read
-this branch while they build, so it cannot hold a catalogue that lies about
-what is approved.
+every pull request by running `scripts/sdd-check.sh` — one command that a
+developer and an agent run the same way, so what fails in CI fails identically
+on a laptop. It calls `scripts/spec-index.sh --check`, which fails the build if
+`specs/INDEX.md` is not what the headers would generate, and
+`scripts/spec-check.sh`, which fails it if a status is not one of the five, an
+`approved` spec still has an unchecked open question, an id is not `NNN-slug`
+zero-padded or repeats a number another spec already has, a placeholder is still
+committed, a supersession is recorded on only one of the two specs, an
+acceptance criterion names a requirement that does not exist, or a
+`## Verification` ledger disagrees with the criteria it accounts for — and the
+Rule 1 check still refuses a `plan.md` or a `tasks.md` anywhere in the
+repository. Consumers read this branch while they build, so it cannot hold a
+catalogue that lies about what is approved.
