@@ -13,6 +13,8 @@ one repository out of several.
 Argument: a spec id. If it is missing, take the most recently modified spec whose
 status is `draft`.
 
+Reasoning: high — telling real ambiguity from a question that only sounds like one is the judgement this command exists for.
+
 ## Read first
 
 - The spec, and its `wireframe.html` if it has one.

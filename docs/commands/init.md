@@ -11,6 +11,8 @@ Argument: `new` (a product with no specs written yet) or `existing` (there are
 specs, product documents or a previous spec system to fold in). If it is missing,
 decide by looking.
 
+Reasoning: standard — it fills templates from what it reads, and asks rather than guesses.
+
 ## Read first
 
 Always: `AGENTS.md`, `docs/constitution.md`, `README.md`,

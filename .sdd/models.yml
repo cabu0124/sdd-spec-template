@@ -1,0 +1,44 @@
+# Which model each command suggests.
+#
+# Commands declare how much reasoning they are worth — `Reasoning: high`,
+# `standard` or `mechanical`, on a line in their own file under docs/commands/.
+# This file turns those tiers into a suggested model per tool, and
+# scripts/sdd-onboard.sh writes it into every generated command adapter.
+#
+# **Nothing here is enforced.** No generated file sets a model. The adapter tells
+# the user the tier, the suggestion and the model it is actually running on, then
+# waits: they confirm or switch, and the command continues on whatever they
+# chose. Picking someone's model for them is a cost and a quality decision taken
+# out of their hands, and it silently breaks on an account that does not have it.
+#
+# One table per tool, because the catalogues do not match: Claude Code names
+# models one way, Copilot another, and a model one of them offers may not exist
+# for the other. A tool with no table here names the tier and suggests nothing,
+# which is the honest answer until you decide what its tiers mean.
+#
+# Edit this, then re-run /sdd-onboard. It is committed, so the whole team gets
+# the same suggestions. For a one-off experiment without editing it, export
+# SDD_MODEL_<TOOL>_<TIER> or SDD_MODEL_<TIER> and run the generator from a
+# terminal — see docs/commands/onboard.md.
+
+claude:                       # unversioned aliases: they follow the current release
+  high: opus
+  standard: sonnet
+  mechanical: haiku
+
+copilot:                      # as the model picker names them
+  high: Claude Opus 5
+  standard: Claude Sonnet 5
+  mechanical: Claude Haiku 4.5
+
+codex:                        # as `codex --model` and config.toml name them
+  high: gpt-5.5
+  standard: gpt-5.4
+  mechanical: gpt-5.4-mini
+
+# cursor and gemini: no table until you decide what their tiers mean. Their
+# adapters still report the tier, and suggest nothing until you fill this in.
+# cursor:
+#   high: …
+# gemini:
+#   high: …

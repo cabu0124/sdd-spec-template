@@ -9,6 +9,8 @@ Argument: a spec id, and optionally the target status —
 the next transition would require. With no argument at all, report every spec and
 stop.
 
+Reasoning: mechanical — it reads a header, checks the gates `docs/lifecycle.md` names, and writes one line.
+
 ## Read first
 
 - `docs/lifecycle.md` — the transitions, and what each one obliges.
