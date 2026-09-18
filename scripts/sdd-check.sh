@@ -50,6 +50,7 @@ esac
 run "Specs only — no plans, no task lists" specs_only
 run "Statuses, ids, criteria and verification" bash scripts/spec-check.sh
 run "Spec validator behavioral fixtures" bash scripts/test-spec-check.sh
+run "Model routing reaches every generated adapter" bash scripts/test-sdd-onboard.sh
 run "specs/INDEX.md matches the spec headers" bash scripts/spec-index.sh --check
 
 exit "$failed"

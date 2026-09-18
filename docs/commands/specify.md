@@ -6,6 +6,8 @@ both belong to the `plan.md` of each repository that implements it.
 
 Argument: a description of the feature. If it is missing, ask for it.
 
+Reasoning: high — it writes WHAT the product must do, and a requirement that can be read two ways is read two ways by every repository that implements it.
+
 ## Read first
 
 - `AGENTS.md` — scope, boundaries, and what "done" means here.

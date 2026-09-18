@@ -6,6 +6,7 @@
 /.claude/
 /.cursor/
 /.gemini/
+/.codex/
 /.github/copilot-instructions.md
 /.github/prompts/
 /.github/chatmodes/

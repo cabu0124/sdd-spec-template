@@ -2,7 +2,7 @@
 #
 # Generate the local adapter and command files for one or more agent tools.
 #
-#   scripts/sdd-onboard.sh claude cursor copilot gemini
+#   scripts/sdd-onboard.sh claude cursor copilot gemini codex
 #   scripts/sdd-onboard.sh --check copilot
 
 set -euo pipefail
@@ -24,13 +24,13 @@ while [ "$#" -gt 0 ]; do
       sed -n '2,/^$/s/^# \{0,1\}//p' "$0"
       exit 0
       ;;
-    claude|cursor|copilot|gemini) tools+=("$1") ;;
-    *) die "unsupported tool '$1' (use claude, cursor, copilot or gemini)" 2 ;;
+    claude|cursor|copilot|gemini|codex) tools+=("$1") ;;
+    *) die "unsupported tool '$1' (use claude, cursor, copilot, gemini or codex)" 2 ;;
   esac
   shift
 done
 
-[ "${#tools[@]}" -gt 0 ] || die "pass at least one tool: claude, cursor, copilot or gemini" 2
+[ "${#tools[@]}" -gt 0 ] || die "pass at least one tool: claude, cursor, copilot, gemini or codex" 2
 [ -f AGENTS.md ] || die "AGENTS.md not found" 2
 [ -d docs/commands ] || die "docs/commands not found" 2
 
@@ -53,6 +53,89 @@ argument_hint() {
   local value
   value=$(sed -n 's/^Argument:[[:space:]]*//p' "$1" | head -n1)
   printf '%s' "${value:-optional input}"
+}
+
+# How much reasoning a command is worth, read from its own workflow file:
+# `Reasoning: high` on a line of its own, with any rationale after it. A command
+# that does not say defaults to standard.
+#
+# A tier, never a model name. Naming "Claude Opus 5" in eleven workflow files is
+# eleven files to edit the day it is superseded, in every repository that
+# inherited them — and a workflow file is meant to outlive a vendor's catalogue.
+reasoning() {
+  local value
+  value=$(sed -n 's/^Reasoning:[[:space:]]*//p' "$1" | head -n1 | awk '{ print $1 }')
+  printf '%s' "${value:-standard}"
+}
+
+upper() { printf '%s' "$1" | tr '[:lower:]-' '[:upper:]_'; }
+
+# A model from .sdd/models.yml: one flat table per tool. Kept flat so this reads
+# it with awk and the generator needs nothing installed.
+config_model() {
+  local file=.sdd/models.yml
+  [ -f "$file" ] || return 0
+  awk -v block="$1" -v key="$2" '
+    $0 ~ "^" block ":"      { inb = 1; next }
+    inb && /^[^[:space:]#]/ { exit }
+    inb {
+      line = $0; sub(/#.*/, "", line)
+      if (match(line, /^[[:space:]]+[A-Za-z_]+:/)) {
+        k = line; sub(/^[[:space:]]+/, "", k); sub(/:.*/, "", k)
+        v = line; sub(/^[[:space:]]+[A-Za-z_]+:[[:space:]]*/, "", v)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+        gsub(/^"|"$|^'"'"'|'"'"'$/, "", v)
+        if (k == key) { print v; exit }
+      }
+    }' "$file"
+}
+
+# The tier, resolved to whatever this repository runs — per tool, because the
+# catalogues do not match. Claude Code takes its own aliases, Copilot takes the
+# name as the model picker shows it, and an account without that model gets a
+# reference to something that does not exist.
+#
+# Most specific first:
+#   SDD_MODEL_CLAUDE_HIGH   one tool, one tier, this invocation only
+#   SDD_MODEL_HIGH          every tool, this invocation only
+#   .sdd/models.yml         the committed table — where a team sets this
+#   the defaults below      what a repository gets before it edits anything
+model_for() {
+  local tier=$1 tool=$2 specific generic value
+  specific=$(printf 'SDD_MODEL_%s_%s' "$(upper "$tool")" "$(upper "$tier")")
+  generic=$(printf 'SDD_MODEL_%s' "$(upper "$tier")")
+
+  if [ -n "${!specific:-}" ]; then printf '%s' "${!specific}"; return; fi
+  if [ -n "${!generic:-}" ]; then printf '%s' "${!generic}"; return; fi
+
+  value=$(config_model "$tool" "$tier")
+  if [ -n "$value" ]; then printf '%s' "$value"; return; fi
+
+  case "$tool:$tier" in
+    claude:high)        printf 'opus' ;;
+    claude:mechanical)  printf 'haiku' ;;
+    claude:*)           printf 'sonnet' ;;
+    copilot:high)       printf 'Claude Opus 5' ;;
+    copilot:mechanical) printf 'Claude Haiku 4.5' ;;
+    copilot:*)          printf 'Claude Sonnet 5' ;;
+    *)                  printf '' ;;
+  esac
+}
+
+# What every adapter says about the model. Nothing generated here sets one: the
+# tier and its suggestion are reported to the user, who confirms or changes it
+# before the work starts. A model chosen for someone silently is a cost and a
+# quality decision taken out of their hands, and the tools disagree about which
+# models even exist.
+#
+# With no table for that tool it names the tier and suggests nothing, rather
+# than a model nobody chose.
+model_note() {
+  local tier=$1 tool=$2 model
+  model=$(model_for "$tier" "$tool")
+  printf 'Before doing anything else, tell the user this workflow is rated `%s` reasoning' "$tier"
+  [ -n "$model" ] && printf ', that the suggested model for it is **%s**' "$model"
+  printf ', and which model you are currently running on. Then stop and wait: they confirm it or switch, and you continue on whatever they choose. Never refuse to run on the model they pick, and never change it yourself.'
 }
 
 escape_double_quotes() {
@@ -109,6 +192,11 @@ write_adapter() {
         rule_block
       } > "$stage/$target"
       ;;
+    codex)
+      # Codex already reads AGENTS.md at the repository root, so there is no
+      # second instructions file to write and nothing to keep in step with it.
+      return 0
+      ;;
     copilot)
       target=.github/copilot-instructions.md
       mkdir -p "$stage/.github"
@@ -132,11 +220,12 @@ write_adapter() {
 }
 
 write_commands() {
-  local tool=$1 file name target desc hint
+  local tool=$1 file name target desc hint tier
   for file in docs/commands/*.md; do
     name=$(basename "$file" .md)
     desc=$(description "$file")
     hint=$(argument_hint "$file")
+    tier=$(reasoning "$file")
     case "$tool" in
       claude)
         target=".claude/commands/sdd-$name.md"
@@ -147,20 +236,29 @@ write_commands() {
           printf 'argument-hint: "%s"\n' "$(printf '%s' "$hint" | escape_double_quotes)"
           printf '%s\n\n' '---'
           printf '<!-- %s -->\n\n' "$marker"
-          printf 'Read `docs/commands/%s.md` and follow it.\n\nInput: $ARGUMENTS\n' "$name"
+          printf 'Read `docs/commands/%s.md` and follow it.\n\n%s\n\nInput: $ARGUMENTS\n' \
+            "$name" "$(model_note "$tier" "$tool")"
         } > "$stage/$target"
         ;;
       cursor)
         target=".cursor/commands/sdd-$name.md"
         mkdir -p "$stage/.cursor/commands"
-        printf '<!-- %s -->\n\nRead `docs/commands/%s.md` and follow it.\n\nInput: $ARGUMENTS\n' \
-          "$marker" "$name" > "$stage/$target"
+        printf '<!-- %s -->\n\nRead `docs/commands/%s.md` and follow it.\n\n%s\n\nInput: $ARGUMENTS\n' \
+          "$marker" "$name" "$(model_note "$tier" "$tool")" > "$stage/$target"
         ;;
       copilot)
         target=".github/prompts/sdd-$name.prompt.md"
         mkdir -p "$stage/.github/prompts"
-        printf '<!-- %s -->\n\nRead `docs/commands/%s.md` and follow it.\n\nInput: ${input:args}\n' \
-          "$marker" "$name" > "$stage/$target"
+        {
+          printf '%s\n' '---'
+          printf 'mode: agent\n'
+          printf 'description: "%s"\n' "$(printf '%s' "$desc" | escape_double_quotes)"
+          printf 'argument-hint: "%s"\n' "$(printf '%s' "$hint" | escape_double_quotes)"
+          printf '%s\n\n' '---'
+          printf '<!-- %s -->\n\n' "$marker"
+          printf 'Read `docs/commands/%s.md` and follow it.\n\n%s\n\nInput: ${input:args}\n' \
+            "$name" "$(model_note "$tier" "$tool")"
+        } > "$stage/$target"
         ;;
       gemini)
         target=".gemini/commands/sdd-$name.toml"
@@ -168,7 +266,21 @@ write_commands() {
         {
           printf '# %s\n' "$marker"
           printf 'description = "%s"\n' "$(printf '%s' "$desc" | escape_double_quotes)"
-          printf 'prompt = "Read docs/commands/%s.md and follow it.\\n\\nInput: {{args}}"\n' "$name"
+          printf 'prompt = "Read docs/commands/%s.md and follow it.\\n\\n%s\\n\\nInput: {{args}}"\n' \
+            "$name" "$(model_note "$tier" "$tool" | escape_double_quotes)"
+        } > "$stage/$target"
+        ;;
+      codex)
+        # Codex reads AGENTS.md natively; its custom prompts are plain markdown
+        # with no model field, so the tier travels in the body.
+        target=".codex/prompts/sdd-$name.md"
+        mkdir -p "$stage/.codex/prompts"
+        {
+          printf '<!-- %s -->\n\n' "$marker"
+          printf '# /sdd-%s — %s\n\n' "$name" "$desc"
+          printf 'Read `docs/commands/%s.md` and follow it.\n\n' "$name"
+          printf '%s\n\n' "$(model_note "$tier" "$tool")"
+          printf 'Input: $ARGUMENTS\n'
         } > "$stage/$target"
         ;;
     esac
