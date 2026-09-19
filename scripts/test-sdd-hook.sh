@@ -12,6 +12,7 @@ if root=$(git rev-parse --show-toplevel 2>/dev/null); then
 fi
 
 hook="$PWD/scripts/sdd-hook.sh"
+compactor="$PWD/scripts/sdd-compact.sh"
 passed=0
 
 fail() { echo "fixture failed: $1" >&2; exit 1; }
@@ -45,14 +46,15 @@ expect_untouched() {
   ok
 }
 
-# Each agent gets its own reply shape.
+# Each agent gets its own reply shape, and every one of them names the
+# compactor by absolute path: the terminal's directory is not ours to assume.
 expect_rewrite claude "$(bash_payload 'git status')" \
-  '{"hookSpecificOutput":{"hookEventName":"PreToolUse","updatedInput":{"command":"scripts/sdd-compact.sh git status"}}}'
-expect_rewrite copilot "$(bash_payload 'git status')" '"updatedInput":{"command":"scripts/sdd-compact.sh git status"}'
-expect_rewrite codex "$(bash_payload 'git status')" '"updatedInput":{"command":"scripts/sdd-compact.sh git status"}'
-expect_rewrite cursor "$(bash_payload 'git status')" '{"updated_input":{"command":"scripts/sdd-compact.sh git status"}}'
+  "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"updatedInput\":{\"command\":\"$compactor git status\"}}}"
+expect_rewrite copilot "$(bash_payload 'git status')" "\"updatedInput\":{\"command\":\"$compactor git status\"}"
+expect_rewrite codex "$(bash_payload 'git status')" "\"updatedInput\":{\"command\":\"$compactor git status\"}"
+expect_rewrite cursor "$(bash_payload 'git status')" "{\"updated_input\":{\"command\":\"$compactor git status\"}}"
 expect_rewrite gemini '{"tool_name":"run_shell_command","tool_input":{"command":"git status"}}' \
-  '{"decision":"allow","hookSpecificOutput":{"tool_input":{"command":"scripts/sdd-compact.sh git status"}}}'
+  "{\"decision\":\"allow\",\"hookSpecificOutput\":{\"tool_input\":{\"command\":\"$compactor git status\"}}}"
 
 # Gemini decides on every call, so silence is not an answer.
 output=$(run_hook gemini "$(bash_payload 'cat /etc/hosts')")
@@ -83,11 +85,20 @@ expect_untouched claude "$(bash_payload 'git show HEAD:file')" 'git show'
 # configurations can be live at once — VS Code reads .github/hooks/ and
 # .claude/settings.local.json both.
 rewritten=$(run_hook claude "$(bash_payload 'git status')" | sed -n 's/.*"command":"\([^"]*\)".*/\1/p')
-[ "$rewritten" = 'scripts/sdd-compact.sh git status' ] || fail "unexpected rewrite: $rewritten"
+[ "$rewritten" = "$compactor git status" ] || fail "unexpected rewrite: $rewritten"
 expect_untouched claude "$(bash_payload "$rewritten")" 'already rewritten'
 
 # An unknown agent is a no-op, not a crash.
 expect_untouched unknown-agent "$(bash_payload 'git status')" 'unknown tool'
+
+# The rewritten command has to run from wherever the agent is, which in a
+# multi-repo workspace is not this repository. A relative path exits 127 there.
+elsewhere=$(mktemp -d)
+git -C "$elsewhere" init -q .
+(cd "$elsewhere" && eval "$rewritten" > /dev/null 2>&1) \
+  || fail 'the rewritten command does not run outside this repository'
+rm -rf "$elsewhere"
+ok
 
 # --- installation -----------------------------------------------------------
 #

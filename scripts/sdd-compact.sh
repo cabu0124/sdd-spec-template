@@ -171,7 +171,11 @@ if [ "$code" -ne 0 ] || [ "$trimmed" -eq 1 ]; then
       printf -- '--- exit: %d ---\n' "$code"
     } | bash "$here/sdd-recall.sh" --save
   )
-  [ -n "$id" ] && printf '[full output: scripts/sdd-recall.sh %s]\n' "$id"
+  # The hint has to be runnable from wherever the agent is, so it stays absolute
+  # unless this repository is that directory.
+  recall="$here/sdd-recall.sh"
+  case $recall in "$PWD"/*) recall="${recall#"$PWD"/}" ;; esac
+  [ -n "$id" ] && printf '[full output: %s %s]\n' "$recall" "$id"
 fi
 
 exit "$code"

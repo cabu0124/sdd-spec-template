@@ -24,6 +24,8 @@
 
 set -uo pipefail
 
+here=$(cd "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
 tool=${1:-}
 case $tool in
   claude | copilot | cursor | codex | gemini) ;;
@@ -113,7 +115,15 @@ command_line=$(json_value command) || passthrough
 [ -n "$command_line" ] || passthrough
 is_compactable "$command_line" || passthrough
 
-rewritten="scripts/sdd-compact.sh $command_line"
+# An absolute path, because the terminal's working directory is not ours to
+# assume: it is the workspace root, which in a multi-repo workspace is nowhere
+# near scripts/. A relative path there fails with 127 instead of compacting.
+compactor="$here/sdd-compact.sh"
+case $compactor in
+  *[!A-Za-z0-9/._-]*) passthrough ;;
+esac
+
+rewritten="$compactor $command_line"
 
 # The value carries no quote and no backslash — is_compactable refused those —
 # so it needs no escaping to be a valid JSON string.

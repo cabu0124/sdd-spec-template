@@ -16,11 +16,16 @@
 
 set -euo pipefail
 
+here=$(cd "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
 if root=$(git rev-parse --show-toplevel 2>/dev/null); then
   cd "$root"
 fi
 
-store=${SDD_RECALL_DIR:-.sdd/recall}
+# Anchored to this script's own repository, not to the caller's directory: the
+# compactor runs wherever the agent happens to be, and a store that followed it
+# would scatter output across repositories that never agreed to hold it.
+store=${SDD_RECALL_DIR:-$(cd "$here/.." && pwd)/.sdd/recall}
 max_entries=${SDD_RECALL_MAX_ENTRIES:-20}
 max_bytes=${SDD_RECALL_MAX_BYTES:-1048576}
 
