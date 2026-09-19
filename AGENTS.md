@@ -64,4 +64,5 @@ Classify the request before writing:
 | Roles for a subagent or chat mode | `docs/agents/` |
 | Model-invoked how-to guides | `docs/skills/` |
 | Why command output is condensed, and how to see all of it | `docs/token-budget.md` |
+| Moving to a newer version of the template | `docs/commands/upgrade.md` |
 | Always-on rules scoped to a file glob | `docs/standards/` |

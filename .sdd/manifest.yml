@@ -1,0 +1,86 @@
+# What this template owns, and how `scripts/sdd-upgrade.sh` may touch each file
+# in a repository built from it.
+#
+# Three classes, and the difference is the whole design:
+#
+#   managed  The template's own. An upgrade overwrites them, unless the
+#            repository edited them — .sdd/template.lock is what tells the two
+#            apart. A local edit is reported and left alone, never merged.
+#
+#   seeded   Delivered once, then the repository's. An upgrade never rewrites
+#            them; it only refreshes the marked blocks listed under `blocks:`.
+#            This is where the product lives, and the product is not ours.
+#
+#   ignored  Never touched, never reported. Specs, skills a repository wrote
+#            for itself, its licence, its own changelog.
+#
+# Every versioned file is in exactly one of the three, and
+# scripts/test-sdd-upgrade.sh fails when one is in none — otherwise a file added
+# to the template years from now silently stops reaching anybody.
+#
+# Lists are explicit rather than globbed on purpose. A glob decides the class of
+# files nobody has written yet; this way, adding a file is a decision.
+
+managed:
+  - .gitattributes
+  - .gitignore
+  - .github/workflows/link-check.yml
+  - .github/workflows/pr-title.yml
+  - .github/workflows/release.yml
+  - .github/workflows/specs-index.yml
+  - .sdd/manifest.yml
+  - docs/agents/.gitkeep
+  - docs/commands/adopt.md
+  - docs/commands/clarify.md
+  - docs/commands/init.md
+  - docs/commands/onboard.md
+  - docs/commands/specify.md
+  - docs/commands/status.md
+  - docs/commands/upgrade.md
+  - docs/lifecycle.md
+  - docs/skills/.gitkeep
+  - docs/skills/reading-condensed-output/SKILL.md
+  - docs/standards/.gitkeep
+  - docs/templates/agent.md
+  - docs/templates/index.md
+  - docs/templates/readme.md
+  - docs/templates/skill.md
+  - docs/templates/spec.md
+  - docs/templates/standard.md
+  - docs/templates/wireframe.html
+  - docs/token-budget.md
+  - scripts/sdd-check.sh
+  - scripts/sdd-compact.sh
+  - scripts/sdd-doctor.sh
+  - scripts/sdd-hook.sh
+  - scripts/sdd-lib.sh
+  - scripts/sdd-onboard.sh
+  - scripts/sdd-recall.sh
+  - scripts/sdd-upgrade.sh
+  - scripts/spec-check.sh
+  - scripts/spec-index.sh
+  - scripts/test-sdd-compact.sh
+  - scripts/test-sdd-hook.sh
+  - scripts/test-sdd-onboard.sh
+  - scripts/test-sdd-recall.sh
+  - scripts/test-sdd-upgrade.sh
+  - scripts/test-spec-check.sh
+
+seeded:
+  - .github/CODEOWNERS
+  - .sdd/models.yml
+  - AGENTS.md
+  - README.md
+  - docs/constitution.md
+  - docs/consumers.md
+  - docs/product/glossary.md
+
+ignored:
+  - CHANGELOG.md
+  - LICENSE
+
+# A block of the template living inside a file that belongs to the repository.
+# `file marker` — the upgrade replaces what is between <!-- marker:start --> and
+# <!-- marker:end -->, and touches nothing else in that file.
+blocks:
+  - AGENTS.md sdd:rule1

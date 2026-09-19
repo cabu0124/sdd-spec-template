@@ -85,6 +85,7 @@ run "Model routing reaches every generated adapter" bash scripts/test-sdd-onboar
 run "Compacted output stays faithful to what the command said" bash scripts/test-sdd-compact.sh
 run "The rewrite hook fails open and never approves" bash scripts/test-sdd-hook.sh
 run "Recall store caps, isolates and returns what it stored" bash scripts/test-sdd-recall.sh
+run "Upgrades respect what this repository edited" bash scripts/test-sdd-upgrade.sh
 run "specs/INDEX.md matches the spec headers" bash scripts/spec-index.sh --check
 
 if ! sdd_verbose; then

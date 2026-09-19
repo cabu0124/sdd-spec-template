@@ -29,9 +29,21 @@ for command in bash git sed awk grep find sort mktemp diff cmp; do
 done
 
 for file in AGENTS.md docs/commands scripts/sdd-onboard.sh scripts/sdd-check.sh \
-  scripts/sdd-lib.sh scripts/sdd-compact.sh scripts/sdd-recall.sh scripts/sdd-hook.sh; do
+  scripts/sdd-lib.sh scripts/sdd-compact.sh scripts/sdd-recall.sh scripts/sdd-hook.sh \
+  scripts/sdd-upgrade.sh .sdd/manifest.yml; do
   [ -e "$file" ] && pass "$file exists" || fail "$file is missing"
 done
+
+# Where this repository's scaffolding came from. Without it an upgrade has no
+# baseline to tell a local edit from a file that is simply old.
+if [ -f .sdd/template.yml ]; then
+  pass "template: $(sed -n 's/^version:[[:space:]]*//p' .sdd/template.yml | head -n1) from $(sed -n 's/^source:[[:space:]]*//p' .sdd/template.yml | head -n1)"
+  [ -f .sdd/template.lock ] \
+    && pass '.sdd/template.lock records what the template delivered' \
+    || warn '.sdd/template.lock is missing; run scripts/sdd-upgrade.sh --adopt'
+else
+  printf 'note: no .sdd/template.yml, so this repository records no template version. See docs/commands/upgrade.md.\n'
+fi
 
 # A hook that exits non-zero takes the agent's turn down with it, so the one
 # thing worth checking here is that a payload it cannot read is survivable.
