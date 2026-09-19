@@ -155,6 +155,25 @@ sha_here() { [ -f "$1" ] && git hash-object "$1" 2>/dev/null; }
 locked_sha() { [ -f "$LOCK" ] && awk -v p="$1" '$2 == p { print $1; exit }' "$LOCK"; }
 mode_at() { git -C "$src" ls-tree "$commit" -- "$1" 2>/dev/null | awk '{ print $1; exit }'; }
 
+# Files this repository has taken over. A deliberate divergence stops being news
+# after the first time it is reported, and a check that cries wolf on every run
+# is a check nobody reads the day it means something.
+kept_list() {
+  [ -f "$CONFIG" ] || return 0
+  awk '
+    /^keep:/ { inside = 1; next }
+    /^[^[:space:]#]/ { inside = 0 }
+    inside && /^[[:space:]]*-[[:space:]]/ {
+      sub(/^[[:space:]]*-[[:space:]]*/, "")
+      sub(/[[:space:]]*#.*$/, "")
+      sub(/[[:space:]]*$/, "")
+      if (length($0)) print
+    }
+  ' "$CONFIG"
+}
+
+is_kept() { kept_list | grep -Fqx "$1"; }
+
 block_body() {
   git -C "$src" show "$commit:$1" 2>/dev/null \
     | awk -v s="<!-- $2:start -->" -v e="<!-- $2:end -->" '$0 == s { f = 1; next } $0 == e { f = 0 } f'
@@ -186,6 +205,8 @@ while IFS= read -r path; do
     record new "$path" "$remote"
   elif [ "$remote" = "$local_sha" ]; then
     record current "$path" "$remote"
+  elif is_kept "$path"; then
+    record kept "$path"
   elif [ -n "$locked" ] && [ "$locked" = "$local_sha" ]; then
     record update "$path" "$remote"
   else
@@ -213,6 +234,7 @@ count() { awk -v k="$1" '$1 == k' "$actions" | wc -l | tr -d ' '; }
 
 to_apply=$(( $(count new) + $(count update) + $(count block) ))
 needs_review=$(( $(count conflict) + $(count gone) + $(count blockmissing) ))
+kept=$(count kept)
 
 # --- report ------------------------------------------------------------------
 
@@ -230,6 +252,7 @@ if [ "$mode" != adopt ]; then
       update)  printf '  update    %s\n' "$path" ;;
       block)   printf '  block     %s (%s)\n' "$path" "$extra" ;;
       conflict) printf '  conflict  %s — edited here, left alone\n' "$path" ;;
+      kept)    printf '  kept      %s — yours, by keep: in %s\n' "$path" "$CONFIG" ;;
       gone)    printf '  gone      %s — dropped by the template, delete it yourself\n' "$path" ;;
       blockmissing) printf '  no marker %s — lost its %s block\n' "$path" "$extra" ;;
     esac
@@ -275,6 +298,9 @@ write_lock() {
 }
 
 write_config() {
+  # keep: is the repository's, not ours — read it before the file is rewritten.
+  local keeps
+  keeps=$(kept_list)
   {
     printf '# Where this repository'"'"'s scaffolding comes from, and which version it is on.\n'
     printf '# Written by scripts/sdd-upgrade.sh — the version is a pin, so nothing moves\n'
@@ -282,6 +308,11 @@ write_config() {
     printf 'source: %s\n' "$source_url"
     printf 'version: %s\n' "$target"
     printf 'resolved: %s\n' "$commit"
+    if [ -n "$keeps" ]; then
+      printf '\n# Managed files this repository has taken over. An upgrade reports them and\n'
+      printf '# never writes them.\nkeep:\n'
+      printf '%s\n' "$keeps" | sed 's/^/  - /'
+    fi
   } > "$CONFIG"
 }
 
@@ -312,8 +343,9 @@ if [ "$mode" = apply ]; then
   write_lock
   write_config
 
-  printf '\n%d file(s) written, %d left for you. %s and %s updated.\n' \
-    "$applied" "$needs_review" "$CONFIG" "$LOCK"
+  printf '\n%d file(s) written, %d left for you' "$applied" "$needs_review"
+  [ "$kept" -gt 0 ] && printf ', %d kept as yours' "$kept"
+  printf '. %s and %s updated.\n' "$CONFIG" "$LOCK"
   printf 'Nothing was committed. Read the diff, then commit it.\n'
 
   if git -C "$src" cat-file -e "$commit:docs/migrations/$target.md" 2>/dev/null; then
@@ -373,10 +405,14 @@ if [ "$mode" = adopt ]; then
 fi
 
 if [ "$to_apply" -eq 0 ] && [ "$needs_review" -eq 0 ]; then
-  printf '\nUp to date.\n'
+  printf '\nUp to date'
+  [ "$kept" -gt 0 ] && printf ', with %d file(s) kept as yours' "$kept"
+  printf '.\n'
   exit 0
 fi
 
-printf '\n%d to apply, %d for you to look at.\n' "$to_apply" "$needs_review"
+printf '\n%d to apply, %d for you to look at' "$to_apply" "$needs_review"
+[ "$kept" -gt 0 ] && printf ', %d kept as yours' "$kept"
+printf '.\n'
 [ "$mode" = check ] && printf 'Run --diff to read them, --apply to write them.\n'
 exit 1
