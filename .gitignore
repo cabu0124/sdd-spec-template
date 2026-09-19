@@ -12,4 +12,9 @@
 /.github/chatmodes/
 /.github/skills/
 /.github/instructions/
+/.github/hooks/
+
+# Full output of compacted runs, kept by scripts/sdd-recall.sh. Local, and it
+# holds whatever the commands printed.
+/.sdd/recall/
 /**/*.DS_Store

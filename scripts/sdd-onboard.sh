@@ -374,6 +374,45 @@ write_standards() {
   done
 }
 
+# The PreToolUse hook that routes a shell command through
+# scripts/sdd-compact.sh before the agent runs it. Every target below is
+# gitignored: a hook is a developer's local wiring, and the tool it wires is
+# scripts/sdd-hook.sh, which is not.
+#
+# The management marker rides in a "_generatedBy" key, since JSON has no
+# comments. A file here that lacks it was written by someone else, and
+# install_generated refuses to overwrite it rather than merging JSON blind.
+write_hooks() {
+  local tool=$1 target event
+  case "$tool" in
+    claude)  target=.claude/settings.local.json;    event=PreToolUse ;;
+    copilot) target=.github/hooks/sdd-compact.json; event=PreToolUse ;;
+    codex)   target=.codex/hooks.json;              event=PreToolUse ;;
+    cursor)  target=.cursor/hooks.json;             event=preToolUse ;;
+    gemini)  target=.gemini/settings.json;          event=BeforeTool ;;
+    *) return 0 ;;
+  esac
+
+  mkdir -p "$stage/$(dirname "$target")"
+  {
+    printf '{\n'
+    printf '  "_generatedBy": "%s",\n' "$marker"
+    printf '  "hooks": {\n'
+    printf '    "%s": [\n' "$event"
+    printf '      {\n'
+    printf '        "type": "command",\n'
+    printf '        "command": "bash scripts/sdd-hook.sh %s"' "$tool"
+    # Codex reads the OS-specific spelling rather than the shared one.
+    if [ "$tool" = codex ]; then
+      printf ',\n        "bash": "bash scripts/sdd-hook.sh codex"'
+    fi
+    printf '\n      }\n'
+    printf '    ]\n'
+    printf '  }\n'
+    printf '}\n'
+  } > "$stage/$target"
+}
+
 install_generated() {
   local source=$1 target=${1#"$stage"/}
   if [ -f "$target" ] && ! grep -Fq "$marker" "$target"; then
@@ -397,6 +436,7 @@ for tool in "${tools[@]}"; do
   write_agents "$tool"
   write_skills "$tool"
   write_standards "$tool"
+  write_hooks "$tool"
 done
 
 failed=0
