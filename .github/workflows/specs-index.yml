@@ -24,4 +24,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Every check this repository runs
-        run: bash scripts/sdd-check.sh
+        run: bash scripts/sdd-check.sh --verbose

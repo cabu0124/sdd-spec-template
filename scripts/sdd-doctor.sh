@@ -28,9 +28,24 @@ for command in bash git sed awk grep find sort mktemp diff cmp; do
     || fail "$command is required but unavailable"
 done
 
-for file in AGENTS.md docs/commands scripts/sdd-onboard.sh scripts/sdd-check.sh; do
+for file in AGENTS.md docs/commands scripts/sdd-onboard.sh scripts/sdd-check.sh \
+  scripts/sdd-lib.sh scripts/sdd-compact.sh scripts/sdd-recall.sh scripts/sdd-hook.sh; do
   [ -e "$file" ] && pass "$file exists" || fail "$file is missing"
 done
+
+# A hook that exits non-zero takes the agent's turn down with it, so the one
+# thing worth checking here is that a payload it cannot read is survivable.
+if [ -f scripts/sdd-hook.sh ]; then
+  if printf 'not a payload' | bash scripts/sdd-hook.sh claude > /dev/null 2>&1; then
+    pass 'the rewrite hook fails open on an unreadable payload'
+  else
+    fail 'the rewrite hook exits non-zero on an unreadable payload'
+  fi
+fi
+
+if [ -f .github/hooks/sdd-compact.json ] && [ -f .claude/settings.local.json ]; then
+  printf 'note: VS Code loads .github/hooks/ and .claude/settings.local.json both, so the hook runs twice per command; the second call is a no-op.\n'
+fi
 
 shell_failed=0
 while IFS= read -r script; do

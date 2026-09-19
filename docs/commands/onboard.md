@@ -45,7 +45,8 @@ Which supported tools the developer uses. Native tools that already read
 3. Confirm the generated paths are ignored with `git check-ignore`. The shipped
    `.gitignore` covers `CLAUDE.md`, `GEMINI.md`, `.claude/`, `.cursor/`,
    `.gemini/`, `.codex/`, `.github/copilot-instructions.md`, `.github/prompts/`,
-   `.github/chatmodes/`, `.github/skills/` and `.github/instructions/`.
+   `.github/chatmodes/`, `.github/skills/`, `.github/instructions/` and
+   `.github/hooks/`.
 4. If the generator refuses an existing file, stop. It only updates files with
    its management marker; merge a hand-written customization deliberately
    instead of overwriting it.
@@ -119,6 +120,11 @@ Which supported tools the developer uses. Native tools that already read
   tools with per-file scoping (`copilot`'s `applyTo`, `cursor`'s `globs`).
   `claude` and `gemini` have no such mechanism; a standard that must always
   apply belongs in `AGENTS.md` instead.
+- **One PreToolUse hook per tool, registering `scripts/sdd-hook.sh`.** It
+  rewrites a handful of read-heavy commands to run through
+  `scripts/sdd-compact.sh`, so their output reaches the model already condensed.
+  The hook never blocks, never approves, and rewrites nothing it cannot parse —
+  see `docs/token-budget.md` for the allowlist and the refusal rules.
 - Re-running with the same inputs produces the same bytes.
 - `--check` writes nothing and reports missing or stale generated files.
 - A file without the management marker is never overwritten.
@@ -134,6 +140,7 @@ read `AGENTS.md` natively can follow `docs/commands/<name>.md` directly.
 | Agent | `docs/agents/*.md` | `.claude/agents/` | `.github/chatmodes/` | — | — | — |
 | Skill | `docs/skills/<slug>/SKILL.md` | `.claude/skills/` | `.github/skills/` | — | — | — |
 | Standard | `docs/standards/*.md` | — | `.github/instructions/` | `.cursor/rules/` | — | — |
+| Hook | `scripts/sdd-hook.sh` | `.claude/settings.local.json` | `.github/hooks/` | `.cursor/hooks.json` | `.gemini/settings.json` | `.codex/hooks.json` |
 
 `codex` gets no instructions adapter: Codex reads the repository's `AGENTS.md`
 itself, and a second file saying the same thing is one more file to keep in step.
