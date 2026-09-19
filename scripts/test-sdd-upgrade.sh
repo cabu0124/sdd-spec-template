@@ -171,6 +171,21 @@ output=$(run_upgrade --list 2>&1) || fail '--list exited non-zero'
 grep -Fq 'v1.1.0' <<< "$output" || fail "--list did not report the versions: $output"
 ok
 
+# A repository can take a managed file over for good. A deliberate divergence is
+# a decision once, not a warning on every run for ever.
+printf 'keep:\n  - docs/commands/thing.md\n' >> "$repo/.sdd/template.yml"
+output=$(run_upgrade 2>&1) && exit_code=0 || exit_code=$?
+[ "${exit_code:-0}" -eq 0 ] || fail "a repository with only kept files still reported work to do: $output"
+grep -Fq 'kept      docs/commands/thing.md' <<< "$output" || fail "the kept file was not reported as kept: $output"
+grep -Fq 'conflict  docs/commands/thing.md' <<< "$output" && fail 'a kept file was still reported as a conflict'
+ok
+
+# The list is the repository's, so rewriting the config must not eat it.
+run_upgrade --to v1.1.0 --apply > /dev/null
+grep -Fq '  - docs/commands/thing.md' "$repo/.sdd/template.yml" || fail 'keep: was lost when the config was rewritten'
+grep -Fq 'echo mine' "$repo/docs/commands/thing.md" || fail 'a kept file was overwritten by --apply'
+ok
+
 # --- this template's own manifest -------------------------------------------
 #
 # Every versioned file is classified, or a file added later silently reaches

@@ -66,6 +66,25 @@ indefinitely; that is a decision, not drift.
 scripts/sdd-upgrade.sh --list     # what the template has published
 ```
 
+## Taking a managed file over for good
+
+Some divergences are permanent: a repository that changed its id convention owns
+its copy of `spec-check.sh` from then on, and no upgrade should offer to take it
+back. List those under `keep:` in `.sdd/template.yml`:
+
+```yaml
+keep:
+  - scripts/spec-check.sh
+  - docs/lifecycle.md
+```
+
+They are reported as `kept` rather than `conflict`, never written, and do not
+count as work pending — so `--check` goes back to exiting 0 in CI.
+
+Use it for a decision you have already made, and not to silence something you
+have not looked at yet. A `conflict` you keep ignoring is the one that matters
+the day the template changes that file for a reason.
+
 ## A repository with no provenance
 
 One built before any of this existed has no `.sdd/template.yml`. Record it once,
