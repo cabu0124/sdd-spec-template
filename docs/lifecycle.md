@@ -82,11 +82,15 @@ proved it. Three rules make it worth the lines it costs:
 Evidence is a link. The tests live in the repositories that run them, and
 `/sdd-status` refuses `done` until every row carries one.
 
-## Numbers, slugs and versions
+## Ids, slugs and versions
 
-- `NNN-slug`, zero-padded, **never reused and never renumbered.** The number is
-  the permanent id in commits, branches, issues and every consumer's
-  `spec.link.yml`.
+- `<id>-<slug>`, **never reused and never renumbered.** The id is the permanent
+  one in commits, branches, issues and every consumer's `spec.link.yml`.
+- **What an id looks like here is declared in `.sdd/config.yml`,** not fixed by
+  this document. The default is a zero-padded sequence this repository mints
+  (`007-password-reset`); a repository whose work is tracked elsewhere sets
+  `spec_id.pattern` to that tracker's shape and `spec_id.source: given`, so the
+  spec carries the id the backlog already uses instead of a second one.
 - The slug travels with the spec into every repository that implements it. Their
   local numbers differ; the slug does not.
 - There are no per-spec version numbers. Git holds the history, the amendments
@@ -102,8 +106,8 @@ from the type on the title:
 | Pull request title | Bump |
 | --- | --- |
 | `<type>!:` or a `BREAKING CHANGE:` footer | major |
-| `feat(NNN): …` | minor |
-| `fix(NNN): …` or `perf(NNN): …` | patch |
+| `feat(<id>): …` | minor |
+| `fix(<id>): …` or `perf(<id>): …` | patch |
 
 Those tags are what a consuming repository pins to when it wants a reviewed set
 of specs rather than the moving branch:
@@ -134,8 +138,9 @@ developer and an agent run the same way, so what fails in CI fails identically
 on a laptop. It calls `scripts/spec-index.sh --check`, which fails the build if
 `specs/INDEX.md` is not what the headers would generate, and
 `scripts/spec-check.sh`, which fails it if a status is not one of the five, an
-`approved` spec still has an unchecked open question, an id is not `NNN-slug`
-zero-padded or repeats a number another spec already has, a placeholder is still
+`approved` spec still has an unchecked open question, an id does not match the
+shape `.sdd/config.yml` declares or repeats one another spec already has, a
+placeholder is still
 committed, a supersession is recorded on only one of the two specs, an
 acceptance criterion names a requirement that does not exist, or a
 `## Verification` ledger disagrees with the criteria it accounts for — and the

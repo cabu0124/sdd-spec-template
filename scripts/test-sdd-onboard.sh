@@ -157,4 +157,23 @@ rm "$work/docs/commands/untiered.md"
 # Codex reads AGENTS.md itself, so onboarding it writes no second instructions file.
 [ -f "$work/CODEX.md" ] && { echo 'codex got a redundant instructions file' >&2; exit 1; }
 
-echo '14 model-suggestion fixture(s) passed.'
+# Every role under docs/agents/ becomes a subagent for the tools that have one.
+# Without this the directory can quietly empty out and nothing would ever be
+# delegated — which is how reading ends up back in the main thread.
+agent_count=0
+for file in "$work"/docs/agents/*.md; do
+  [ -f "$file" ] || continue
+  agent_count=$((agent_count + 1))
+  slug=$(basename "$file" .md)
+  for target in ".claude/agents/$slug.md" ".github/chatmodes/$slug.chatmode.md"; do
+    [ -f "$work/$target" ] || { echo "no subagent generated: $target" >&2; exit 1; }
+  done
+  # The description is the mechanism, not documentation: it is what makes a tool
+  # reach for the subagent on its own.
+  grep -q '^description:' "$file" \
+    || { echo "$file declares no description, so nothing will ever invoke it" >&2; exit 1; }
+done
+[ "$agent_count" -gt 0 ] \
+  || { echo 'docs/agents/ defines no roles, so no subagent is ever generated' >&2; exit 1; }
+
+echo '15 model-suggestion and delegation fixture(s) passed.'

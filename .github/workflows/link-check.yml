@@ -8,7 +8,7 @@ name: Links
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main]
 
 permissions:
   contents: read

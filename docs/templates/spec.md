@@ -1,4 +1,4 @@
-# Spec NNN — [feature name]
+# Spec <id> — [feature name]
 
 <!-- Metadata. Every line is read by a person and some by a machine: keep the
      shapes, fill the values, delete only the lines marked as optional. -->
@@ -11,8 +11,8 @@
 - **Consumers:** <repo> · <repo> <!-- repositories expected to implement it; "unknown" is an honest answer -->
 - **Verifier:** <repo> <!-- multi-repo specs: who runs the integrated check and reports it done. Delete when one repository builds all of it -->
 - **US:** <id or link> <!-- the story this comes from, if it has one elsewhere; delete if none -->
-- **Supersedes:** <NNN-slug> <!-- delete if none -->
-- **Superseded by:** <NNN-slug> <!-- delete unless the status is superseded -->
+- **Supersedes:** <id>-<slug> <!-- delete if none -->
+- **Superseded by:** <id>-<slug> <!-- delete unless the status is superseded -->
 
 WHAT the product must do, and why. No technology, no repository, no schema, no
 rollout: the same spec holds for every repository that implements it. HOW, and

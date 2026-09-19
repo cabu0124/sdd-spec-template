@@ -59,6 +59,7 @@ git -C "$template" tag v1.0.0
 printf '#!/usr/bin/env bash\necho v2\n' > "$template/scripts/tool.sh"
 printf 'the second thing\n' > "$template/docs/commands/thing.md"
 printf 'brand new\n' > "$template/docs/commands/added.md"
+printf 'delivered once\n' > "$template/config.yml"
 printf '# AGENTS\n\n<!-- sdd:rule1:start -->\nrule one, v2\n<!-- sdd:rule1:end -->\n\n## Product\n\n<fill me>\n' \
   > "$template/AGENTS.md"
 { manifest; printf '  - docs/commands/added.md\n'; } > "$template/.sdd/manifest.yml"
@@ -71,6 +72,7 @@ managed:
   - .sdd/manifest.yml
 seeded:
   - AGENTS.md
+  - config.yml
 ignored:
   - LICENSE
 blocks:
@@ -145,6 +147,11 @@ ok
 # Seeded files keep their content; only the marked block moves.
 grep -Fq 'My actual product.' "$repo/AGENTS.md" || fail 'a seeded file lost the product content'
 grep -Fq 'rule one, v2' "$repo/AGENTS.md" || fail 'the rule1 block was not refreshed'
+ok
+
+# A seeded file the repository never received is delivered: it has nothing of its
+# own to lose, and without this a setting added to the template reaches nobody.
+grep -Fq 'delivered once' "$repo/config.yml" || fail 'a newly seeded file was not delivered'
 ok
 
 # The repository's own files are never in scope.

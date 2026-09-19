@@ -88,7 +88,8 @@ and name that file when you report it.
    already ships empty of rows. Delete `docs/templates/readme.md` too — it is
    spent, the README is written — and `docs/templates/index.md` once
    `specs/INDEX.md` starts holding real rows. With no user interface, delete
-   `docs/templates/wireframe.html` as well. Delete `CHANGELOG.md` if it carries
+   `docs/templates/wireframe.html` and `docs/skills/drawing-wireframes/` as
+   well. Delete `CHANGELOG.md` if it carries
    the template's own releases: a repository created from a template inherits it,
    and a changelog opening with someone else's versions is lying from its first
    line.

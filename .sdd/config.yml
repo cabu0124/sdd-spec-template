@@ -1,0 +1,22 @@
+# How this repository identifies its specs.
+#
+# Fill <...> only if the defaults do not fit. See docs/lifecycle.md.
+
+spec_id:
+  # The shape of the id, without the slug. `scripts/spec-check.sh` checks every
+  # spec directory against `<pattern>-<slug>`.
+  #
+  #   [0-9]{3}          007-password-reset      the default: a zero-padded sequence
+  #   F-[0-9]+          F-012-tutorial-scenes   an id that comes from a backlog
+  #   [A-Z]+-[0-9]+     ACME-1234-export-csv    a tracker key
+  pattern: '[0-9]{3}'
+
+  # Where a new id comes from, which is what /sdd-specify does when none is given:
+  #
+  #   sequential  suggest the next free one and ask before writing
+  #   given       ask for it and stop — an id this repository mints is an id the
+  #               backlog does not use, and the same work ends up with two
+  source: sequential
+
+  # Shown when a command has to ask for an id.
+  example: '007'

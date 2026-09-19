@@ -17,7 +17,7 @@ this repository                     a development repository
 
 ## What we owe them
 
-**A stable layout.** One directory per spec at `specs/<NNN-slug>/`, holding
+**A stable layout.** One directory per spec at `specs/<id>-<slug>/`, holding
 `spec.md` and, when the feature has screens, `wireframe.html`. A consumer's
 `.sdd/config.yml` names that directory; moving or renaming it breaks every
 repository at once.

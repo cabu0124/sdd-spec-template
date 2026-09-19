@@ -59,6 +59,16 @@ if [ -f .github/hooks/sdd-compact.json ] && [ -f .claude/settings.local.json ]; 
   printf 'note: VS Code loads .github/hooks/ and .claude/settings.local.json both, so the hook runs twice per command; the second call is a no-op.\n'
 fi
 
+# A repository with no subagents defined does every read in the main thread, and
+# pays for it again on every call that follows.
+if [ -d docs/agents ]; then
+  if find docs/agents -maxdepth 1 -name '*.md' | grep -q .; then
+    pass "$(find docs/agents -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') subagent(s) defined in docs/agents/"
+  else
+    warn 'docs/agents/ is empty, so nothing is ever delegated; see docs/skills/delegating-exploration/'
+  fi
+fi
+
 shell_failed=0
 while IFS= read -r script; do
   bash -n "$script" || shell_failed=1
@@ -92,7 +102,19 @@ else
   fail "managed agent adapters are stale; run scripts/sdd-onboard.sh $*"
 fi
 
-if [ -f .sdd/config.yml ]; then
+# The shape of a spec id, which every repository declares and this one owns.
+if [ -f .sdd/config.yml ] && grep -q '^spec_id:' .sdd/config.yml; then
+  id_pattern=$(sed -n '/^spec_id:/,/^[^[:space:]#]/p' .sdd/config.yml \
+    | sed -n 's/^[[:space:]][[:space:]]*pattern:[[:space:]]*//p' | head -n1 \
+    | sed -e "s/^'//" -e "s/'\$//" -e 's/[[:space:]]*$//')
+  case "$id_pattern" in
+    ''|*'<'*) fail 'spec_id.pattern is empty or still a placeholder' ;;
+    *) pass "spec ids match '$id_pattern'" ;;
+  esac
+fi
+
+# Only a repository that consumes a Spec Repository has one to check.
+if [ -f .sdd/config.yml ] && grep -q '^spec_repo:' .sdd/config.yml; then
   if grep -qE '^spec_repo:[[:space:]]*none[[:space:]]*(#.*)?$' .sdd/config.yml; then
     pass 'spec_repo: none; this repository owns its specs'
   else
