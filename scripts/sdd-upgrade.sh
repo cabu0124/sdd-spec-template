@@ -214,6 +214,16 @@ while IFS= read -r path; do
   fi
 done < <(manifest_list managed)
 
+# A seeded file is delivered once and then belongs to the repository — but one
+# that was never delivered has nothing to belong to. Create it when it is
+# missing, and never touch it when it is already there.
+while IFS= read -r path; do
+  [ -n "$path" ] || continue
+  [ -f "$path" ] && continue
+  remote=$(sha_at "$path")
+  [ -n "$remote" ] && record new "$path" "$remote"
+done < <(manifest_list seeded)
+
 while IFS= read -r entry; do
   [ -n "$entry" ] || continue
   file=${entry%% *}

@@ -25,7 +25,7 @@ Every specification is a directory under [`specs/`](specs/):
 ```text
 specs/
   INDEX.md                every spec, its status and who implements it
-  NNN-slug/
+  <id>-<slug>/
     spec.md               problem · scope · requirements · acceptance criteria
     wireframe.html        where things sit on screen — only if it has screens
 ```
@@ -64,10 +64,10 @@ and `tasks.md` against it:
 
 ```bash
 # in the development repository
-/sdd-sync <NNN-slug>     # copies spec.md in, read-only
-/sdd-plan <NNN>          # HOW that repository builds it
-/sdd-tasks <NNN>
-/sdd-implement <NNN>
+/sdd-sync <id>-<slug>     # copies spec.md in, read-only
+/sdd-plan <id>          # HOW that repository builds it
+/sdd-tasks <id>
+/sdd-implement <id>
 ```
 
 It points at this repository once, in its `.sdd/config.yml`:
@@ -91,7 +91,7 @@ the fix reaches every repository at once.
 ```mermaid
 flowchart LR
   specify["<b>/sdd-specify</b><br>WHAT"] --> clarify["<b>/sdd-clarify</b><br>the gaps"]
-  clarify --> status["<b>/sdd-status NNN approved</b><br>the gate"]
+  clarify --> status["<b>/sdd-status <id> approved</b><br>the gate"]
   status --> consumers["consumers <b>/sdd-sync</b> it"]
 ```
 
@@ -107,7 +107,7 @@ can see the codebase they would be taken in.
 | `docs/consumers.md` | The contract with development repositories |
 | `docs/commands/` | The workflow behind each command |
 | `docs/product/` | Glossary and product documentation |
-| `specs/NNN-slug/` | One spec |
+| `specs/<id>-<slug>/` | One spec |
 
 > [!TIP]
 > **New here?** Set up your agent tool once with `docs/commands/onboard.md` — the
@@ -117,7 +117,7 @@ can see the codebase they would be taken in.
 
 | | |
 | --- | --- |
-| Branch from | `develop` — `feature/<NNN>-<slug>` or `fix/<NNN>-<slug>` |
+| Branch from | `develop` — `feature/<id>-<slug>` or `fix/<id>-<slug>` |
 | Pull request title | Conventional Commits — `feat(014): password reset` |
 | Merge | squash into `develop`; `develop` → `main` publishes |
 | Release | automatic from `main`: a SemVer tag consumers can pin to |

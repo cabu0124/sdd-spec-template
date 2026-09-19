@@ -9,4 +9,4 @@ a published spec — `approved`, or `done` once it has been delivered — see
 
 | Spec | Status | Owner | Consumers | Updated |
 | --- | --- | --- | --- | --- |
-| [`NNN-slug`](NNN-slug/spec.md) — <feature name> | approved | <owner> | `<repo>` · `<repo>` | YYYY-MM-DD |
+| [`<id>-<slug>`](<id>-<slug>/spec.md) — <feature name> | approved | <owner> | `<repo>` · `<repo>` | YYYY-MM-DD |

@@ -74,6 +74,22 @@ ledger() {
 failed=0
 checked=0
 
+# The shape of a spec id, declared rather than hardcoded: a repository whose ids
+# come from a backlog owns a different one, and used to have to fork this script
+# to say so. Unset anywhere, it is the zero-padded sequence this template ships.
+spec_id_pattern() {
+  local value=${SDD_SPEC_ID_PATTERN:-}
+  if [ -z "$value" ] && [ -f .sdd/config.yml ]; then
+    value=$(sed -n '/^spec_id:/,/^[^[:space:]#]/p' .sdd/config.yml \
+      | sed -n 's/^[[:space:]][[:space:]]*pattern:[[:space:]]*//p' \
+      | head -n1 \
+      | sed -e 's/[[:space:]]*#.*$//' -e "s/^'//" -e "s/'\$//" -e 's/^"//' -e 's/"$//' -e 's/[[:space:]]*$//')
+  fi
+  printf '%s' "${value:-[0-9][0-9][0-9]}"
+}
+
+id_pattern=$(spec_id_pattern)
+
 check_one() {
   local dir=$1 spec slug status successor reqs refs ref duplicate is_mirror
   local acs ledger_acs ac evidence verified_at consumers ledger_cols criterion_lines
@@ -90,12 +106,12 @@ check_one() {
   fi
   checked=$((checked + 1))
 
-  if [[ ! "$slug" =~ ^[0-9]{3}-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
-    echo "::error file=$spec::directory name '$slug' is not NNN-slug, zero-padded (docs/lifecycle.md)"
+  if [[ ! "$slug" =~ ^${id_pattern}-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+    echo "::error file=$spec::directory name '$slug' is not <id>-<slug>, where <id> matches '$id_pattern' (.sdd/config.yml, docs/lifecycle.md)"
     failed=1
   fi
 
-  # A placeholder starts with a letter — <!-- --> comments and <NNN-slug>
+  # A placeholder starts with a letter — <!-- --> comments and <id>-<slug>
   # style values both would, so this only flags the literal <...> left unfilled.
   if grep -qE '<[A-Za-z][^>]*>' "$spec"; then
     echo "::error file=$spec::an unfilled <...> placeholder is still committed"
