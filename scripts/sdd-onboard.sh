@@ -400,13 +400,28 @@ write_hooks() {
     printf '  "hooks": {\n'
     printf '    "%s": [\n' "$event"
     printf '      {\n'
-    printf '        "type": "command",\n'
-    printf '        "command": "bash scripts/sdd-hook.sh %s"' "$tool"
-    # Codex reads the OS-specific spelling rather than the shared one.
-    if [ "$tool" = codex ]; then
-      printf ',\n        "bash": "bash scripts/sdd-hook.sh codex"'
+    # Claude Code nests its commands under a matcher and rejects the file
+    # outright without one. VS Code reads that shape too — it parses Claude's
+    # format and ignores the matcher — but the other three take the command
+    # directly, and a key they do not know is one more thing to be wrong about.
+    if [ "$tool" = claude ]; then
+      printf '        "matcher": "Bash",\n'
+      printf '        "hooks": [\n'
+      printf '          {\n'
+      printf '            "type": "command",\n'
+      printf '            "command": "bash scripts/sdd-hook.sh claude"\n'
+      printf '          }\n'
+      printf '        ]\n'
+    else
+      printf '        "type": "command",\n'
+      printf '        "command": "bash scripts/sdd-hook.sh %s"' "$tool"
+      # Codex reads the OS-specific spelling rather than the shared one.
+      if [ "$tool" = codex ]; then
+        printf ',\n        "bash": "bash scripts/sdd-hook.sh codex"'
+      fi
+      printf '\n'
     fi
-    printf '\n      }\n'
+    printf '      }\n'
     printf '    ]\n'
     printf '  }\n'
     printf '}\n'

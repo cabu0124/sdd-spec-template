@@ -130,6 +130,23 @@ done
   || fail 'regenerating the hooks produced different bytes'
 ok
 
+# The shape each agent demands, not merely the command it names. Claude Code
+# refuses the whole settings file when a PreToolUse entry is not matcher +
+# hooks[] — and a refused file takes everything declared beside it with it.
+grep -Fq '"matcher": "Bash"' "$work/.claude/settings.local.json" \
+  || fail 'the claude hook has no matcher; Claude Code rejects the file without one'
+grep -Fq '"hooks": [' "$work/.claude/settings.local.json" \
+  || fail 'the claude hook does not nest its command under hooks[]'
+ok
+
+# VS Code and Copilot CLI take the command directly instead.
+grep -Fq '"type": "command"' "$work/.github/hooks/sdd-compact.json" \
+  || fail 'the copilot hook is not a direct command entry'
+if grep -Fq '"matcher"' "$work/.github/hooks/sdd-compact.json"; then
+  fail 'the copilot hook carries a matcher wrapper it does not use'
+fi
+ok
+
 # A hook file someone else wrote is never silently replaced: merging JSON blind
 # is how a developer loses their own configuration.
 printf '{"hooks":{"PreToolUse":[{"type":"command","command":"mine"}]}}\n' > "$work/.cursor/hooks.json"
