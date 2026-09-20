@@ -25,11 +25,15 @@ screen?** It is not a design, and everything in it traces back to a requirement.
 ## What goes in
 
 - **One section per screen the spec names**, and no screen it does not.
-- **Every breakpoint the product supports**, as declared in `AGENTS.md`. Draw
-  real frames at those sizes; a content-height crop is not a screen.
-- **The states the spec calls for**, including the unhappy ones — empty, error,
-  loading, permission-denied. A wireframe that only draws the happy path hides
-  the half of the work that is hard.
+- **Each state the spec calls for, drawn once**, at the breakpoint `AGENTS.md`
+  names as the baseline — including the unhappy ones: empty, error, loading,
+  permission-denied. A wireframe that only draws the happy path hides the half of
+  the work that is hard.
+- **The other breakpoints only where the layout itself changes.** A state that
+  differs from another by a label, a value or a mark is the same arrangement, and
+  redrawing it at every size teaches a reviewer nothing while costing the same as
+  a frame that does. Draw real frames at the sizes you do draw; a content-height
+  crop is not a screen.
 - **The banner filled with this spec's path**, so a reviewer who opens the file
   alone knows what they are looking at.
 
@@ -51,6 +55,12 @@ Zones another spec owns are drawn as labelled context, never as content.
 
 ## Before calling it drawn
 
-Open every frame and every required state in a browser, offline, and look for
-clipping, overlap and illegibility. `scripts/spec-check.sh` validates the spec;
-nothing validates HTML geometry but your eyes.
+Read back the densest frame you drew — the one carrying the most at the smallest
+size — and check it against the requirements it claims to trace to. That is the
+one a mistake hides in.
+
+That is the whole check. Do not open a browser, do not drive one, and do not
+write a harness to measure geometry: a drawing worth forty frames turns "look at
+every one" into an afternoon of building tooling, and the reviewer opens the file
+anyway. Clipping and overlap are theirs to catch; arrangement and traceability
+are yours.
