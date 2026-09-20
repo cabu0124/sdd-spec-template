@@ -17,8 +17,10 @@ screen?** It is not a design, and everything in it traces back to a requirement.
 - The spec is written first. The wireframe is drawn from it, never alongside it.
 - If a product has no user interface, or this feature puts nothing on a screen,
   there is no wireframe. Skip it.
-- Start from `docs/templates/wireframe.html`: it carries the notation and the
-  pieces available. Copy it into the spec's directory.
+- Read `docs/templates/wireframe.html` for the notation and the pieces available.
+  You draw the `<section>` elements only — `scripts/spec-wireframe.sh` puts the
+  kit's head and tail around them. The head is the same in every wireframe, so
+  retyping it decides nothing and risks a rule that silently stops applying.
 
 ## What goes in
 

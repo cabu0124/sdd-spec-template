@@ -61,12 +61,14 @@ managed:
   - scripts/sdd-upgrade.sh
   - scripts/spec-check.sh
   - scripts/spec-index.sh
+  - scripts/spec-wireframe.sh
   - scripts/test-sdd-compact.sh
   - scripts/test-sdd-hook.sh
   - scripts/test-sdd-onboard.sh
   - scripts/test-sdd-recall.sh
   - scripts/test-sdd-upgrade.sh
   - scripts/test-spec-check.sh
+  - scripts/test-spec-wireframe.sh
 
 seeded:
   - .github/CODEOWNERS
