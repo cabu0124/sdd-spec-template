@@ -81,11 +81,12 @@ of being guessed. That is what the section is for, and `/sdd-clarify` closes it.
 5. Wireframe — only when `AGENTS.md` says this product has a user interface *and*
    this feature puts something on a screen. Follow
    `docs/skills/drawing-wireframes/`, which carries this product's notation and
-   the rules a wireframe here must follow. Hand the first drawing to the
-   `wireframe-artist` subagent: it writes `specs/<id>-<slug>/wireframe.html`
-   itself and reports rather than returning the markup — the template is large,
-   and handing it back would undo the point of delegating. Iterate here
-   afterwards, reading the drawn file rather than the template again.
+   the rules a wireframe here must follow. Draw the `<section>` elements and
+   assemble them with `scripts/spec-wireframe.sh <id>-<slug>` — never reproduce
+   the kit's head. Draw it here rather than delegating: this is the last step of
+   the command, so a subagent would pay a full second reading of the spec and the
+   kit to protect a context that ends a turn later. Iterate by reading the drawn
+   file, which is smaller than the kit.
 6. One spec per product story, whole, however many repositories it takes. Do not
    split the work between repositories and do not write a contract — both are
    decided in the consuming repositories' plans. `## Consumers` names who is

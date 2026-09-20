@@ -31,7 +31,6 @@ managed:
   - .sdd/manifest.yml
   - docs/agents/.gitkeep
   - docs/agents/spec-explorer.md
-  - docs/agents/wireframe-artist.md
   - docs/commands/adopt.md
   - docs/commands/clarify.md
   - docs/commands/init.md
