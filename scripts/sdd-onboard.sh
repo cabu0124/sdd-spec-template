@@ -382,6 +382,21 @@ write_standards() {
 # The management marker rides in a "_generatedBy" key, since JSON has no
 # comments. A file here that lacks it was written by someone else, and
 # install_generated refuses to overwrite it rather than merging JSON blind.
+
+# An absolute path, because a hook does not always run from the repository root
+# — a backgrounded subagent does not — and a relative one dies there with "No
+# such file or directory" and no compaction. Every target is gitignored, so a
+# path that only works on this machine is the right thing to write. One needing
+# quotes would have to survive shell and JSON escaping both: fall back to the
+# relative form rather than emit a file the tool rejects whole.
+hook_command() {
+  local path="$PWD/scripts/sdd-hook.sh"
+  case $path in
+    *[!A-Za-z0-9/._-]*) path=scripts/sdd-hook.sh ;;
+  esac
+  printf 'bash %s %s' "$path" "$1"
+}
+
 write_hooks() {
   local tool=$1 target event
   case "$tool" in
@@ -409,15 +424,15 @@ write_hooks() {
       printf '        "hooks": [\n'
       printf '          {\n'
       printf '            "type": "command",\n'
-      printf '            "command": "bash scripts/sdd-hook.sh claude"\n'
+      printf '            "command": "%s"\n' "$(hook_command claude)"
       printf '          }\n'
       printf '        ]\n'
     else
       printf '        "type": "command",\n'
-      printf '        "command": "bash scripts/sdd-hook.sh %s"' "$tool"
+      printf '        "command": "%s"' "$(hook_command "$tool")"
       # Codex reads the OS-specific spelling rather than the shared one.
       if [ "$tool" = codex ]; then
-        printf ',\n        "bash": "bash scripts/sdd-hook.sh codex"'
+        printf ',\n        "bash": "%s"' "$(hook_command codex)"
       fi
       printf '\n'
     fi

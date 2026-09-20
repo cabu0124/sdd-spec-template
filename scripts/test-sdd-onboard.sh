@@ -176,4 +176,19 @@ done
 [ "$agent_count" -gt 0 ] \
   || { echo 'docs/agents/ defines no roles, so no subagent is ever generated' >&2; exit 1; }
 
-echo '15 model-suggestion and delegation fixture(s) passed.'
+# The hook is registered with a path that resolves from anywhere. A backgrounded
+# subagent does not run from the repository root, and a relative path fails there
+# with "No such file or directory" — non-blocking, so the command still runs and
+# nothing is compacted, which is the failure nobody notices.
+for target in .claude/settings.local.json .github/hooks/sdd-compact.json \
+              .codex/hooks.json .cursor/hooks.json .gemini/settings.json; do
+  [ -f "$work/$target" ] || { echo "no hook generated: $target" >&2; exit 1; }
+  hook_path=$(sed -n 's/.*"command": "bash \([^ ]*\) [a-z]*".*/\1/p' "$work/$target" | head -n1)
+  [ -n "$hook_path" ] || { echo "$target registers no hook command" >&2; exit 1; }
+  # A path needing quotes falls back to the relative form on purpose.
+  case $work in *[!A-Za-z0-9/._-]*) continue ;; esac
+  (cd / && [ -f "$hook_path" ]) \
+    || { echo "$target registers a path that does not resolve outside the repository: $hook_path" >&2; exit 1; }
+done
+
+echo '16 model-suggestion and delegation fixture(s) passed.'
